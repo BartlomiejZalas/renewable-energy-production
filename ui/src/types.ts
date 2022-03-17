@@ -1,5 +1,6 @@
 import {
     BiogasPlant,
+    Hour,
     PVAreaAndEfficiency,
     PvNominalPower,
     WindTurbine,
@@ -10,3 +11,11 @@ export type PowerPlant =
     | PVAreaAndEfficiency
     | PvNominalPower
     | WindTurbine;
+
+export interface ProductionRecord {
+    date: Hour;
+    production: {
+        producedElectricity: number;
+        proucedHeat: number;
+    };
+}

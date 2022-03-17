@@ -15,7 +15,7 @@ interface ResponseDto {
 export class PvGisWindinessProvider implements WindinessProvider {
     async get(year: number, location: Location): Promise<Windiness> {
         const apiUrl = this.prepareUrl(location, year);
-        const response = await fetch(apiUrl);
+        const response = await fetch(apiUrl, {mode: 'cors'});
         const data: ResponseDto = await response.json();
         const windRecords: WindRecord[] = data.outputs.hourly.map(
             this.mapToRecords

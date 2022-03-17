@@ -24,7 +24,7 @@ export class PvGisIrradiationProvider implements IrradiationProvider {
         angle: number
     ): Promise<Irradiation> {
         const apiUrl = this.prepareUrl(location, year, azimuth, angle);
-        const response = await fetch(apiUrl);
+        const response = await fetch(apiUrl, {mode: 'cors'});
         const data: ResponseDto = await response.json();
         const irradiationRecords: IrradiationRecord[] = data.outputs.hourly.map(
             this.mapToRecords

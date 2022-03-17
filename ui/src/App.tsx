@@ -8,6 +8,7 @@ import {
 } from '@mui/material';
 import { ConsumptionManagement } from './consumption-management/ConsumptionManagement';
 import { PowerPlants } from './power-plants-management/PowerPlants';
+import { SimulationResults } from './simulation-results/SimulationResults';
 
 const App = () => {
     return (
@@ -33,7 +34,7 @@ const App = () => {
                         </Paper>
                     </Grid>
                     <Grid item xs={12}>
-                        Symulacja
+                        <SimulationResults />
                     </Grid>
                 </Grid>
             </Container>

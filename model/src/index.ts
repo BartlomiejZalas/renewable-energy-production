@@ -3,9 +3,11 @@ import { EnergyProductionSimulator } from './energy-production-simulator/EnergyP
 import { PVAreaAndEfficiency } from './powerPlants/solar/PVAreaAndEfficiency';
 import { PvNominalPower } from './powerPlants/solar/PvNominalPower';
 import { WindTurbine } from './powerPlants/wind/WindTurbine';
+import { Hour } from './energy-production-simulator/ProductionInYear';
 
 export {
     EnergyProductionSimulator,
+    Hour,
     PvNominalPower,
     PVAreaAndEfficiency,
     BiogasPlant,
