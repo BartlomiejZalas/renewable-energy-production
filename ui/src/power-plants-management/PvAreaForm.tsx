@@ -7,7 +7,6 @@ import {
     TextFieldProps,
 } from '@mui/material';
 import { Formik } from 'formik';
-import { PVAreaAndEfficiency } from 'renewable-energy-production-model';
 import { useContext } from 'react';
 import { StateContext } from '../state/StateProvider';
 import { object, string, number } from 'yup';
@@ -38,7 +37,7 @@ const validationSchema = (existingIds: string[]) =>
     });
 
 export const PvAreaForm: React.FC<Props> = (props) => {
-    const { addPowerPlant, plantIds } = useContext(StateContext);
+    const {addPvEfficiency, plantIds} = useContext(StateContext);
     return (
         <Formik<Values>
             validateOnChange={false}
@@ -52,30 +51,30 @@ export const PvAreaForm: React.FC<Props> = (props) => {
                 angle: 0,
             }}
             validationSchema={validationSchema(plantIds)}
-            onSubmit={(values, { setSubmitting }) => {
-                const { id, lat, lng, area, efficiency, azimuth, angle } =
+            onSubmit={(values, {setSubmitting}) => {
+                const {id, lat, lng, area, efficiency, azimuth, angle} =
                     values;
-                const pv = new PVAreaAndEfficiency(
-                    { lat, lng },
+                addPvEfficiency({
+                    id,
+                    location: {lat, lng},
                     area,
                     efficiency,
                     azimuth,
                     angle
-                );
-                addPowerPlant({ id, powerPlant: pv });
+                });
                 setSubmitting(false);
                 props.onClose();
             }}
         >
             {({
-                values,
-                errors,
-                touched,
-                handleChange,
-                handleBlur,
-                handleSubmit,
-                isSubmitting,
-            }) => {
+                  values,
+                  errors,
+                  touched,
+                  handleChange,
+                  handleBlur,
+                  handleSubmit,
+                  isSubmitting,
+              }) => {
                 const commonProps = (name: keyof Values): TextFieldProps => ({
                     size: 'small',
                     fullWidth: true,
@@ -124,7 +123,7 @@ export const PvAreaForm: React.FC<Props> = (props) => {
 
                         <TextField label="Azymut" {...commonProps('azimuth')} />
 
-                        <Divider sx={{ py: 2, mb: 2 }} />
+                        <Divider sx={{py: 2, mb: 2}}/>
                         <Box display="flex" justifyContent="flex-end">
                             <Button onClick={props.onClose}>Anuluj</Button>
                             <Button

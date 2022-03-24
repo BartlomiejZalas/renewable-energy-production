@@ -4,11 +4,9 @@ import {
     Divider,
     TextField,
     TextFieldProps,
-    useTheme,
 } from '@mui/material';
 import { Dialog } from '../common/Dialog';
 import { Formik } from 'formik';
-import { BiogasPlant } from 'renewable-energy-production-model';
 import { useContext } from 'react';
 import { StateContext } from '../state/StateProvider';
 import { object, string, number } from 'yup';
@@ -25,7 +23,7 @@ interface Values {
     heatGeneratorEfficiency: number;
     electricityGeneratorEfficiency: number;
     ownHeatConsumption: number;
-    ownElectricConsumption: number;
+    ownElectricityConsumption: number;
 }
 
 const validationSchema = (existingIds: string[]) =>
@@ -36,12 +34,11 @@ const validationSchema = (existingIds: string[]) =>
         heatGeneratorEfficiency: number().required().min(0).max(100),
         electricityGeneratorEfficiency: number().required().min(0).max(100),
         ownHeatConsumption: number().required().min(0).max(100),
-        ownElectricConsumption: number().required().min(0).max(100),
+        ownElectricityConsumption: number().required().min(0).max(100),
     });
 
 export const AddBiogasPlant: React.FC<Props> = (props) => {
-    const theme = useTheme();
-    const { addPowerPlant, plantIds } = useContext(StateContext);
+    const {addBiogasPlant, plantIds} = useContext(StateContext);
     return (
         <Dialog {...props} title="Dodaj biogazwonię">
             <Formik<Values>
@@ -53,43 +50,24 @@ export const AddBiogasPlant: React.FC<Props> = (props) => {
                     heatGeneratorEfficiency: 100,
                     electricityGeneratorEfficiency: 100,
                     ownHeatConsumption: 0,
-                    ownElectricConsumption: 0,
+                    ownElectricityConsumption: 0,
                 }}
                 validationSchema={validationSchema(plantIds)}
-                onSubmit={(values, { setSubmitting }) => {
-                    const {
-                        id,
-                        methanePerHour,
-                        methaneCaloricValue,
-                        electricityGeneratorEfficiency,
-                        heatGeneratorEfficiency,
-                        ownHeatConsumption,
-                        ownElectricConsumption,
-                    } = values;
-
-                    const powerPlant = new BiogasPlant(
-                        methanePerHour,
-                        methaneCaloricValue,
-                        heatGeneratorEfficiency,
-                        electricityGeneratorEfficiency,
-                        ownHeatConsumption,
-                        ownElectricConsumption
-                    );
-
-                    addPowerPlant({ id, powerPlant });
+                onSubmit={(values, {setSubmitting}) => {
+                    addBiogasPlant(values);
                     setSubmitting(false);
                     props.onClose();
                 }}
             >
                 {({
-                    values,
-                    errors,
-                    touched,
-                    handleChange,
-                    handleBlur,
-                    handleSubmit,
-                    isSubmitting,
-                }) => {
+                      values,
+                      errors,
+                      touched,
+                      handleChange,
+                      handleBlur,
+                      handleSubmit,
+                      isSubmitting,
+                  }) => {
                     const commonProps = (
                         name: keyof Values
                     ): TextFieldProps => ({
@@ -136,9 +114,9 @@ export const AddBiogasPlant: React.FC<Props> = (props) => {
                             />
                             <TextField
                                 label="użycie własne elektryczności"
-                                {...commonProps('ownElectricConsumption')}
+                                {...commonProps('ownElectricityConsumption')}
                             />
-                            <Divider sx={{ py: 2, mb: 2 }} />
+                            <Divider sx={{py: 2, mb: 2}}/>
                             <Box display="flex" justifyContent="flex-end">
                                 <Button onClick={props.onClose}>Anuluj</Button>
                                 <Button

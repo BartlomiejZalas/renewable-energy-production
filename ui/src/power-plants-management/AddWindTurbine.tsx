@@ -17,9 +17,7 @@ import {
     CartesianGrid,
     XAxis,
     YAxis,
-    Tooltip,
 } from 'recharts';
-import { WindTurbine } from 'renewable-energy-production-model';
 import { useContext } from 'react';
 import { StateContext } from '../state/StateProvider';
 import { object, string, array, number } from 'yup';
@@ -49,7 +47,7 @@ const validationSchema = (existingIds: string[]) => object({
 
 export const AddWindTurbine: React.FC<Props> = (props) => {
     const theme = useTheme();
-    const { addPowerPlant, plantIds } = useContext(StateContext);
+    const {addWindTurbine, plantIds} = useContext(StateContext);
     return (
         <Dialog {...props} title="Dodaj turbinę wiatrową">
             <Formik<Values>
@@ -63,41 +61,36 @@ export const AddWindTurbine: React.FC<Props> = (props) => {
                     characteristic: Array.from(new Array(31)).map((v) => 0),
                 }}
                 validationSchema={validationSchema(plantIds)}
-                onSubmit={(values, { setSubmitting }) => {
+                onSubmit={(values, {setSubmitting}) => {
                     const {
+                        id,
                         lat,
                         lng,
                         characteristic,
                         height,
                         roughnessFactor,
                     } = values;
-                    const characteristicRaw = characteristic.reduce(
+                    const characteristicData = characteristic.reduce(
                         (object, value, index) => ({
                             ...object,
                             [index]: Number(value),
                         }),
                         {}
                     );
-                    const turbine = new WindTurbine(
-                        { lat: Number(lat), lng: Number(lng) },
-                        characteristicRaw,
-                        Number(height),
-                        Number(roughnessFactor)
-                    );
-                    addPowerPlant({ id: values.id, powerPlant: turbine });
+                    addWindTurbine({id, location: {lat, lng}, height, roughnessFactor, characteristic: characteristicData});
                     setSubmitting(false);
                     props.onClose();
                 }}
             >
                 {({
-                    values,
-                    errors,
-                    touched,
-                    handleChange,
-                    handleBlur,
-                    handleSubmit,
-                    isSubmitting,
-                }) => {
+                      values,
+                      errors,
+                      touched,
+                      handleChange,
+                      handleBlur,
+                      handleSubmit,
+                      isSubmitting,
+                  }) => {
                     const commonProps = (
                         name: keyof Values
                     ): TextFieldProps => ({
@@ -145,7 +138,7 @@ export const AddWindTurbine: React.FC<Props> = (props) => {
                             <Typography variant="caption" color="gray">
                                 Podaj moc dla danej prędkości wiatru
                             </Typography>
-                            <Grid container spacing={1} sx={{ mt: 1 }}>
+                            <Grid container spacing={1} sx={{mt: 1}}>
                                 <FieldArray
                                     name="characteristic"
                                     render={() =>
@@ -163,7 +156,7 @@ export const AddWindTurbine: React.FC<Props> = (props) => {
                                                             values
                                                                 .characteristic[
                                                                 index
-                                                            ]
+                                                                ]
                                                         }
                                                     />
                                                 </Grid>
@@ -173,11 +166,11 @@ export const AddWindTurbine: React.FC<Props> = (props) => {
                                 />
                             </Grid>
                             {errors.characteristic &&
-                                touched.characteristic && (
-                                    <FormHelperText color="error">
-                                        {errors.characteristic}
-                                    </FormHelperText>
-                                )}
+                            touched.characteristic && (
+                                <FormHelperText color="error">
+                                    {errors.characteristic}
+                                </FormHelperText>
+                            )}
                             <Box pt={4} display="flex" justifyContent="center">
                                 <LineChart
                                     width={500}
@@ -189,14 +182,14 @@ export const AddWindTurbine: React.FC<Props> = (props) => {
                                         })
                                     )}
                                 >
-                                    <CartesianGrid stroke="#ccc" />
+                                    <CartesianGrid stroke="#ccc"/>
                                     <Line
                                         type="monotone"
                                         dataKey="power"
                                         stroke={theme.palette.primary.main}
                                         strokeWidth={3}
                                     />
-                                    <XAxis dataKey="speed" unit="m/s" />
+                                    <XAxis dataKey="speed" unit="m/s"/>
                                     <YAxis
                                         unit="W"
                                         domain={[
@@ -211,7 +204,7 @@ export const AddWindTurbine: React.FC<Props> = (props) => {
                                 </LineChart>
                             </Box>
 
-                            <Divider sx={{ py: 2, mb: 2 }} />
+                            <Divider sx={{py: 2, mb: 2}}/>
                             <Box display="flex" justifyContent="flex-end">
                                 <Button onClick={props.onClose}>Anuluj</Button>
                                 <Button

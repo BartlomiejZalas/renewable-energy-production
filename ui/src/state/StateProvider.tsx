@@ -1,10 +1,13 @@
 import { createContext, useState } from 'react';
-import { PowerPlant } from '../types';
+import { WindTurbine, PowerPlant, PvNominalPower, PvEfficiency, BiogasPlant } from './types';
 
 interface State {
-    powerPlants: Array<{ id: string; powerPlant: PowerPlant }>;
+    powerPlants: PowerPlant[];
     plantIds: string[];
-    addPowerPlant: (data: { id: string; powerPlant: PowerPlant }) => void;
+    addWindTurbine: (windTurbine: Omit<WindTurbine, 'type'>) => void;
+    addPvNominalPower: (pvNominalPower: Omit<PvNominalPower, 'type'>) => void;
+    addPvEfficiency: (pvEfficiency: Omit<PvEfficiency, 'type'>) => void;
+    addBiogasPlant: (biogasPlant: Omit<BiogasPlant, 'type'>) => void;
     deletePowerPlant: (id: string) => void;
 }
 
@@ -15,19 +18,32 @@ const CNI = () => {
 const initialValue = {
     powerPlants: [],
     plantIds: [],
-    addPowerPlant: CNI,
+    addWindTurbine: CNI,
+    addPvNominalPower: CNI,
+    addPvEfficiency: CNI,
+    addBiogasPlant: CNI,
     deletePowerPlant: CNI,
 };
 
 export const StateContext = createContext<State>(initialValue);
 
 export const StateProvider: React.FC = ({ children }) => {
-    const [powerPlants, setPowerPlants] = useState<
-        Array<{ id: string; powerPlant: PowerPlant }>
-    >([]);
+    const [powerPlants, setPowerPlants] = useState<PowerPlant[]>([]);
 
-    const addPowerPlant = (data: { id: string; powerPlant: PowerPlant }) => {
-        setPowerPlants((powerPlants) => [data, ...powerPlants]);
+    const addWindTurbine = (windTurbine: Omit<WindTurbine, 'type'>) =>  {
+        setPowerPlants(plants => [...plants, {type: 'WIND', ...windTurbine}])
+    }
+
+    const addPvNominalPower = (pvNominalPower: Omit<PvNominalPower, 'type'>) => {
+        setPowerPlants(plants => [...plants, {type: 'PV_POWER', ...pvNominalPower}]);
+    };
+
+    const addPvEfficiency = (pvEfficiency: Omit<PvEfficiency, 'type'>) => {
+        setPowerPlants(plants => [...plants, {type: 'PV_EFFICIENCY', ...pvEfficiency}]);
+    };
+
+    const addBiogasPlant = (biogasPlant: Omit<BiogasPlant, 'type'>) => {
+        setPowerPlants(plants => [...plants, {type: 'BIOGAS_PLANT', ...biogasPlant}]);
     };
 
     const deletePowerPlant = (id: string) => {
@@ -38,7 +54,14 @@ export const StateProvider: React.FC = ({ children }) => {
 
     return (
         <StateContext.Provider
-            value={{ powerPlants, addPowerPlant, deletePowerPlant, plantIds }}
+            value={{
+                powerPlants,
+                addBiogasPlant,
+                addPvNominalPower,
+                addPvEfficiency,
+                addWindTurbine,
+                deletePowerPlant,
+                plantIds }}
         >
             {children}
         </StateContext.Provider>
