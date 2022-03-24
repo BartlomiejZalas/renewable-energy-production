@@ -37,13 +37,14 @@ export const SimulationResults = () => {
 
     const handleCompute = async () => {
         setLoding(true);
-        const result = await EnergyProductionSimulator.simulateYear(
-            2019,
-            powerPlants.reduce((record, item) => {
-                return { ...record, [item.id]: item.powerPlant };
-            }, {}),
-            (id) => setFinishedIds((finishedIds) => [...finishedIds, id])
-        );
+        // const result = await EnergyProductionSimulator.simulateYear(
+        //     2019,
+        //     powerPlants.reduce((record, item) => {
+        //         return { ...record, [item.id]: item.powerPlant };
+        //     }, {}),
+        //     (id) => setFinishedIds((finishedIds) => [...finishedIds, id])
+        // );
+        const result = await fetch('http://localhost:8080/power');
         setResult(result);
         setLoding(false);
     };
