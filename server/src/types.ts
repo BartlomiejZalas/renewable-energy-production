@@ -3,7 +3,7 @@ import {
     PVAreaAndEfficiency,
     PvNominalPower,
     WindTurbine,
-} from 'renewable-energy-production-model';
+} from './model';
 
 export type PowerPlant =
     | BiogasPlant
@@ -23,7 +23,7 @@ export type ParamsDTO =
           ownElectricityConsumption: number;
       }
     | {
-          type: 'PV_AREA';
+          type: 'PV_EFFICIENCY';
           name: string;
           location: { lat: number; lng: number };
           area: number;

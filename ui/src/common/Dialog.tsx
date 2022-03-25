@@ -8,7 +8,7 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
-const BootstrapDialog = styled(DialogMUI)(({ theme }) => ({
+const BootstrapDialog = styled(DialogMUI)(({theme}) => ({
     '& .MuiDialogContent-root': {
         padding: theme.spacing(2),
     },
@@ -23,10 +23,10 @@ export interface DialogTitleProps {
 }
 
 const BootstrapDialogTitle = (props: DialogTitleProps) => {
-    const { children, onClose } = props;
+    const {children, onClose} = props;
 
     return (
-        <DialogTitle sx={{ m: 0, p: 2 }}>
+        <DialogTitle sx={{m: 0, p: 2}}>
             {children}
             {onClose ? (
                 <IconButton
@@ -38,7 +38,7 @@ const BootstrapDialogTitle = (props: DialogTitleProps) => {
                         color: (theme) => theme.palette.grey[500],
                     }}
                 >
-                    <CloseIcon />
+                    <CloseIcon/>
                 </IconButton>
             ) : null}
         </DialogTitle>
@@ -51,9 +51,13 @@ interface Props {
     title: string;
 }
 
-export const Dialog: React.FC<Props> = ({ open, onClose, title, children }) => {
+export const Dialog: React.FC<Props> = ({open, onClose, title, children}) => {
     return (
-        <BootstrapDialog onClose={onClose} open={open} fullWidth maxWidth="lg">
+        <BootstrapDialog onClose={(e, reason) => {
+            if (reason !== 'backdropClick') {
+                onClose();
+            }
+        }} open={open} fullWidth maxWidth="lg">
             <BootstrapDialogTitle onClose={onClose}>
                 {title}
             </BootstrapDialogTitle>

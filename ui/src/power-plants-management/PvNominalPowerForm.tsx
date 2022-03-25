@@ -7,7 +7,6 @@ import {
     TextFieldProps,
 } from '@mui/material';
 import { Formik } from 'formik';
-import { PvNominalPower } from 'renewable-energy-production-model';
 import { useContext } from 'react';
 import { StateContext } from '../state/StateProvider';
 import { object, string, number } from 'yup';
@@ -36,7 +35,7 @@ const validationSchema = (existingIds: string[]) =>
     });
 
 export const PvNominalPowerForm: React.FC<Props> = (props) => {
-    const { addPowerPlant, plantIds } = useContext(StateContext);
+    const {addPvNominalPower, plantIds} = useContext(StateContext);
     return (
         <Formik<Values>
             validateOnChange={false}
@@ -49,28 +48,27 @@ export const PvNominalPowerForm: React.FC<Props> = (props) => {
                 angle: 0,
             }}
             validationSchema={validationSchema(plantIds)}
-            onSubmit={(values, { setSubmitting }) => {
-                const { id, lat, lng, power, azimuth, angle } = values;
-                const pv = new PvNominalPower(
-                    { lat, lng },
+            onSubmit={(values, {setSubmitting}) => {
+                const {id, lat, lng, power, azimuth, angle} = values;
+                addPvNominalPower({
+                    id, location: {lat, lng},
                     power,
                     azimuth,
                     angle
-                );
-                addPowerPlant({ id: values.id, powerPlant: pv });
+                });
                 setSubmitting(false);
                 props.onClose();
             }}
         >
             {({
-                values,
-                errors,
-                touched,
-                handleChange,
-                handleBlur,
-                handleSubmit,
-                isSubmitting,
-            }) => {
+                  values,
+                  errors,
+                  touched,
+                  handleChange,
+                  handleBlur,
+                  handleSubmit,
+                  isSubmitting,
+              }) => {
                 const commonProps = (name: keyof Values): TextFieldProps => ({
                     size: 'small',
                     fullWidth: true,
@@ -114,7 +112,7 @@ export const PvNominalPowerForm: React.FC<Props> = (props) => {
 
                         <TextField label="Azymut" {...commonProps('azimuth')} />
 
-                        <Divider sx={{ py: 2, mb: 2 }} />
+                        <Divider sx={{py: 2, mb: 2}}/>
                         <Box display="flex" justifyContent="flex-end">
                             <Button onClick={props.onClose}>Anuluj</Button>
                             <Button

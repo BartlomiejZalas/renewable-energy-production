@@ -2,7 +2,7 @@
     "name": "renewable-energy-production-model",
     "version": "1.0.0",
     "description": "",
-    "main": "src/index.ts",
+    "main": "src/dist/index.js",
     "scripts": {
         "start": "tsc && node dist/index.js",
         "test": "jest",

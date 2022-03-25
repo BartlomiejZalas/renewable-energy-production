@@ -3,7 +3,7 @@ import {
     PVAreaAndEfficiency,
     PvNominalPower,
     WindTurbine,
-} from 'renewable-energy-production-model';
+} from './model';
 import { ParamsDTO, PowerPlant } from './types';
 
 export const mapDtoToPowerPlants = (
@@ -34,7 +34,7 @@ const mapDtoToPowerPlant = (dto: ParamsDTO) => {
             dto.roughnessFactor
         );
     }
-    if (dto.type === 'PV_AREA') {
+    if (dto.type === 'PV_EFFICIENCY') {
         return new PVAreaAndEfficiency(
             dto.location,
             dto.area,

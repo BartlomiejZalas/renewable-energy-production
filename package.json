@@ -2,6 +2,7 @@
     "name": "renewable-energy-production-project",
     "workspaces": [
         "model",
-        "ui"
+        "ui",
+        "server"
     ]
 }

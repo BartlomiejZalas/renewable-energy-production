@@ -1,12 +1,15 @@
 import { Response, Request } from 'express';
 import express from 'express';
 import { mapDtoToPowerPlants } from './mapper';
-import { EnergyProductionSimulator } from 'renewable-energy-production-model';
+import { EnergyProductionSimulator } from './model';
+import cors from 'cors';
 
-const app = express();
 const port = process.env.PORT || 8080;
 
-app.get('/power', async (req: Request, res: Response) => {
+const app = express();
+app.use(cors());
+
+app.get('/energy-production', async (req: Request, res: Response) => {
     try {
         const year = Number(req.query.year);
         const parametersDto = JSON.parse(req.query.params as string);
@@ -14,7 +17,7 @@ app.get('/power', async (req: Request, res: Response) => {
 
         const result = await EnergyProductionSimulator.simulateYear(year, powerPlants, () => null);
 
-        res.json(result);
+        res.json({hourly: result});
     } catch (e) {
         res.status(400).send(e.message);
     }
