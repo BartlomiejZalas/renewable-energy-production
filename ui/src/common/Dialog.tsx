@@ -7,6 +7,7 @@ import {
     DialogTitle,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import { ModalProps } from '@mui/material/Modal';
 
 const BootstrapDialog = styled(DialogMUI)(({theme}) => ({
     '& .MuiDialogContent-root': {
@@ -53,7 +54,7 @@ interface Props {
 
 export const Dialog: React.FC<Props> = ({open, onClose, title, children}) => {
     return (
-        <BootstrapDialog onClose={(e, reason) => {
+        <BootstrapDialog onClose={(e: {}, reason: 'backdropClick' | 'escapeKeyDown') => {
             if (reason !== 'backdropClick') {
                 onClose();
             }

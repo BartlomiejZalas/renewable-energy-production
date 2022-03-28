@@ -12,7 +12,7 @@ describe('BiogasPlant', () => {
         ).energyPerHour();
 
         expect(energy.producedElectricity).toBeCloseTo(21.13, 2);
-        expect(energy.proucedHeat).toBeCloseTo(18.39, 2);
+        expect(energy.producedHeat).toBeCloseTo(18.39, 2);
     });
 
     it('should produce electricity', () => {
@@ -26,7 +26,7 @@ describe('BiogasPlant', () => {
         ).energyPerHour();
 
         expect(energy.producedElectricity).toBe(0);
-        expect(energy.proucedHeat).toBeCloseTo(18.39, 2);
+        expect(energy.producedHeat).toBeCloseTo(18.39, 2);
     });
 
     it('should produce heat', () => {
@@ -40,6 +40,6 @@ describe('BiogasPlant', () => {
         ).energyPerHour();
 
         expect(energy.producedElectricity).toBeCloseTo(21.13, 2);
-        expect(energy.proucedHeat).toBe(0);
+        expect(energy.producedHeat).toBe(0);
     });
 });

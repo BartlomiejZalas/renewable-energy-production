@@ -3,6 +3,7 @@ import express from 'express';
 import { mapDtoToPowerPlants } from './mapper';
 import { EnergyProductionSimulator } from './model';
 import cors from 'cors';
+import { aggregate } from './aggregation/aggregator';
 
 const port = process.env.PORT || 8080;
 
@@ -16,8 +17,9 @@ app.get('/energy-production', async (req: Request, res: Response) => {
         const powerPlants = mapDtoToPowerPlants(parametersDto);
 
         const result = await EnergyProductionSimulator.simulateYear(year, powerPlants, () => null);
+        const aggregatedResult = aggregate(result);
 
-        res.json({hourly: result});
+        res.json(aggregatedResult);
     } catch (e) {
         res.status(400).send(e.message);
     }

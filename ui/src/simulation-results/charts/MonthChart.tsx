@@ -5,20 +5,19 @@ import { StateContext } from '../../state/StateProvider';
 
 interface Props {
     data: Array<{
-        date: { year: number, month: number, day: number, hour: number },
-        [key: string]: { producedElectricity: number; producedHeat: number } | { year: number, month: number, day: number, hour: number }
+        date: { year: number, month: number, day: number },
+        [key: string]: { producedElectricity: number; producedHeat: number } | { year: number, month: number, day: number }
     }>;
 }
 
-export const DayChart: React.FC<Props> = ({data}) => {
+export const MonthChart: React.FC<Props> = ({data}) => {
 
     const {getColorById, plantIds} = useContext(StateContext);
     const [month, setMonth] = useState(1);
-    const [day, setDay] = useState(1);
 
-    const januaryFirstData = data
-        .filter(data => data.date.month === month && data.date.day === day)
-        .map(data => ({...data, date: `${data.date.hour}:00`}));
+    const monthData = data
+        .filter(data => data.date.month === month)
+        .map(data => ({...data, date: data.date.day}));
 
     return (
         <Box sx={{width: '100%', height: 400, pb: 5}}>
@@ -36,16 +35,13 @@ export const DayChart: React.FC<Props> = ({data}) => {
                     <MenuItem value={10}>Październik</MenuItem>
                     <MenuItem value={11}>Listopad</MenuItem>
                     <MenuItem value={12}>Grudzień</MenuItem>
-                </TextField>&nbsp;
-                <TextField size="small" select onChange={e => setDay(Number(e.target.value))} value={day}>
-                    {Array.from(new Array(31).values()).map((_, i) => <MenuItem value={i+1} key={i}>{i+1}</MenuItem>)}
                 </TextField>
             </Box>
             <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                     width={500}
                     height={400}
-                    data={januaryFirstData}
+                    data={monthData}
                 >
                     <CartesianGrid strokeDasharray="3 3"/>
                     <XAxis dataKey="date"/>

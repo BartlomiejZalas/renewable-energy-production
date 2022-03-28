@@ -17,7 +17,7 @@ export class BiogasPlant {
         const proucedHeat =
             this.getNetHeatFactor() * this.getTotalHeatProduction();
 
-        return { producedElectricity, proucedHeat };
+        return { producedElectricity, producedHeat: proucedHeat };
     }
 
     private getTotalElectricistyProduction() {

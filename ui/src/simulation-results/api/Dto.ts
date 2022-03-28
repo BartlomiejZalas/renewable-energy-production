@@ -36,10 +36,13 @@ export type QueryParamsDto =
 };
 
 export interface ResultDTO {
-    hourly: {
-        [id: string]: Array<{
-            date: { year: number, month: number, day: number, hour: number },
-            production: { producedElectricity: number; producedHeat: number }
-        }>
-    }
+    hourly: Array<{
+        date: { year: number, month: number, day: number, hour: number },
+        [key: string]: { producedElectricity: number; producedHeat: number } | { year: number, month: number, day: number, hour: number }
+    }>;
+    monthly: Array<{
+        date: { year: number, month: number, day: number },
+        [key: string]: { producedElectricity: number; producedHeat: number } | { year: number, month: number, day: number }
+    }>;
+    total: Record<string, { producedElectricity: number; producedHeat: number }>;
 }

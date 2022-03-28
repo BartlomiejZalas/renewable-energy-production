@@ -1,5 +1,7 @@
+import React from 'react';
 import { createContext, useState } from 'react';
 import { WindTurbine, PowerPlant, PvNominalPower, PvEfficiency, BiogasPlant, Result } from './types';
+import { generateBiogasColor, generateSolarColor, generateWindColor } from './colors';
 
 interface State {
     powerPlants: PowerPlant[];
@@ -14,6 +16,7 @@ interface State {
     deletePowerPlant: (id: string) => void;
     result: null | Result;
     setResult: (result: Result) => void;
+    getColorById: (id: string) => string;
 }
 
 const CNI = () => {
@@ -33,28 +36,64 @@ const initialValue = {
     deletePowerPlant: CNI,
     result: null,
     setResult: CNI,
+    getColorById: CNI,
 };
 
 export const StateContext = createContext<State>(initialValue);
 
-export const StateProvider: React.FC = ({ children }) => {
-    const [powerPlants, setPowerPlants] = useState<PowerPlant[]>([]);
-    const [result, setResult] = useState<Result | null>(null);
-
-    const addWindTurbine = (windTurbine: Omit<WindTurbine, 'type'>) =>  {
-        setPowerPlants(plants => [...plants, {type: 'WIND', ...windTurbine}])
+export const StateProvider: React.FC = ({children}) => {
+    const testTurbine: WindTurbine = {
+        type: 'WIND',
+        id: 'Super Turbina',
+        height: 40,
+        characteristic: {0: 200, 1: 300, 2: 400, 3: 1000},
+        location: {lat: 51.0, lng: 17.0},
+        roughnessFactor: 0.5,
+        color: '#87CEFA',
+    }
+    const pv1: PvNominalPower = {
+        type: 'PV_POWER',
+        power: 3000,
+        id: 'Super PV',
+        angle: 15,
+        azimuth: 10,
+        location: {lat: 51.0, lng: 17.0},
+        color: '#FF7F50',
     }
 
-    const addPvNominalPower = (pvNominalPower: Omit<PvNominalPower, 'type'>) => {
-        setPowerPlants(plants => [...plants, {type: 'PV_POWER', ...pvNominalPower}]);
+    const [powerPlants, setPowerPlants] = useState<PowerPlant[]>([testTurbine, pv1]);
+    const [result, setResult] = useState<Result | null>(null);
+
+    const addWindTurbine = (windTurbine: Omit<WindTurbine, 'type' | 'color'>) => {
+        setPowerPlants(plants => [...plants, {
+            ...windTurbine,
+            type: 'WIND',
+            color: generateWindColor(windTurbines.length)
+        }])
+    }
+
+    const addPvNominalPower = (pvNominalPower: Omit<PvNominalPower, 'type' | 'color'>) => {
+        setPowerPlants(plants => [...plants, {
+            ...pvNominalPower,
+            type: 'PV_POWER',
+            color: generateSolarColor(pvs.length)
+        }]);
     };
 
     const addPvEfficiency = (pvEfficiency: Omit<PvEfficiency, 'type'>) => {
-        setPowerPlants(plants => [...plants, {type: 'PV_EFFICIENCY', ...pvEfficiency}]);
+        setPowerPlants(plants => [...plants, {
+            ...pvEfficiency,
+            type: 'PV_EFFICIENCY',
+            color: generateSolarColor(pvs.length)
+        }]);
     };
 
     const addBiogasPlant = (biogasPlant: Omit<BiogasPlant, 'type'>) => {
-        setPowerPlants(plants => [...plants, {type: 'BIOGAS_PLANT', ...biogasPlant}]);
+        setPowerPlants(plants => [...plants, {
+            ...biogasPlant,
+            type: 'BIOGAS_PLANT',
+            color: generateBiogasColor(biogasPowerPlants.length)
+        }]);
     };
 
     const deletePowerPlant = (id: string) => {
@@ -66,6 +105,8 @@ export const StateProvider: React.FC = ({ children }) => {
     const windTurbines = powerPlants.filter(p => p.type === 'WIND') as WindTurbine[];
     const pvs = powerPlants.filter(p => p.type === 'PV_POWER' || p.type === 'PV_EFFICIENCY') as Array<PvEfficiency | PvNominalPower>;
     const biogasPowerPlants = powerPlants.filter(p => p.type === 'BIOGAS_PLANT') as BiogasPlant[];
+
+    const getColorById = (id: string) => powerPlants.find(p => p.id === id)?.color || '#000000';
 
     return (
         <StateContext.Provider
@@ -82,6 +123,7 @@ export const StateProvider: React.FC = ({ children }) => {
                 plantIds,
                 setResult,
                 result,
+                getColorById
             }}
         >
             {children}

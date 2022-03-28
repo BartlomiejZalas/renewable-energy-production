@@ -8,7 +8,7 @@ describe('BiogasPlantProductionSimulator', () => {
 
         jest.spyOn(biogasPlant, 'energyPerHour').mockImplementation(() => ({
             producedElectricity: 7,
-            proucedHeat: 8,
+            producedHeat: 8,
         }));
 
         const year = await simulator.simulateYear(2001, biogasPlant);
@@ -18,7 +18,7 @@ describe('BiogasPlantProductionSimulator', () => {
             year.every((record) => record.production.producedElectricity === 7)
         ).toBe(true);
         expect(
-            year.every((record) => record.production.proucedHeat === 8)
+            year.every((record) => record.production.producedHeat === 8)
         ).toBe(true);
     });
 });

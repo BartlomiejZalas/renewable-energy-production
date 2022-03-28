@@ -5,6 +5,7 @@ export interface WindTurbine {
     characteristic: { [windSpeed: number]: number };
     height: number;
     roughnessFactor: number;
+    color: string;
 }
 
 export interface PvNominalPower {
@@ -14,6 +15,7 @@ export interface PvNominalPower {
     angle: number;
     location: { lat: number, lng: number };
     power: number;
+    color: string;
 }
 
 export interface PvEfficiency {
@@ -24,6 +26,7 @@ export interface PvEfficiency {
     location: { lat: number, lng: number };
     area: number,
     efficiency: number,
+    color: string;
 }
 
 export interface BiogasPlant {
@@ -35,16 +38,19 @@ export interface BiogasPlant {
     electricityGeneratorEfficiency: number,
     ownHeatConsumption: number,
     ownElectricityConsumption: number,
+    color: string;
 }
 
 export type PowerPlant = WindTurbine | PvNominalPower | PvEfficiency | BiogasPlant;
 
 export interface Result{
-    hourly: HourlyResultRow[];
-}
-
-export interface HourlyResultRow {
-    id: string;
-    date: { year: number, month: number, day: number, hour: number };
-    production: { producedElectricity: number; producedHeat: number };
+    hourly: Array<{
+        date: { year: number, month: number, day: number, hour: number },
+        [key: string]: { producedElectricity: number; producedHeat: number } | { year: number, month: number, day: number, hour: number }
+    }>;
+    monthly: Array<{
+        date: { year: number, month: number, day: number },
+        [key: string]: { producedElectricity: number; producedHeat: number } | { year: number, month: number, day: number }
+    }>;
+    total: Record<string, { producedElectricity: number; producedHeat: number }>;
 }

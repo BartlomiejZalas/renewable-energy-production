@@ -7,14 +7,6 @@ export abstract class SimulatorResultsApiMapper {
     }
 
     static mapDtoToResult(dto: ResultDTO): Result {
-        return {
-            hourly: Object.keys(dto.hourly)
-                .reduce((array: HourlyResultRow[], id) => {
-                return [
-                    ...array,
-                    ...dto.hourly[id].map((records) => ({...records, id}))
-                ];
-            }, [])
-        };
+        return dto;
     }
 }

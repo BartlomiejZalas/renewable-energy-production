@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { AppBar, Backdrop, Button, CircularProgress, Toolbar, Typography } from '@mui/material';
+import { AppBar, Backdrop, CircularProgress, Toolbar, Typography } from '@mui/material';
 import { drawerWidth } from './constants';
 import { useCompute } from '../simulation-results/useCompute';
 import { StateContext } from '../state/StateProvider';
@@ -12,10 +12,16 @@ export const TopBar = () => {
     const {powerPlants} = useContext(StateContext);
     return (
         <>
-            <AppBar position="fixed" sx={{width: `calc(100% - ${drawerWidth}px)`, background: '#FFF', height: 70, borderLeft: 'none', borderTop: 'none'}} variant="outlined">
+            <AppBar position="fixed" sx={{
+                width: `calc(100% - ${drawerWidth}px)`,
+                background: '#FFF',
+                height: 70,
+                borderLeft: 'none',
+                borderTop: 'none'
+            }} variant="outlined">
                 <Toolbar>
                     <Typography variant="h6" sx={{flexGrow: 1, color: 'primary.main'}}>
-                        Produkcja OZE
+                        Produkcja Energii
                     </Typography>
                     <LoadingButton
                         variant="contained"

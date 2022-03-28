@@ -69,12 +69,12 @@ export const LeftDrawer = () => {
             anchor="left"
         >
             <Box display="flex" alignItems="center" justifyContent="space-between" p={2}>
-                <Typography variant="subtitle1">Produkcja OZE</Typography>
+                <Typography variant="subtitle1">Instalacje OZE</Typography>
                 <AddPowerPlant/>
             </Box>
 
             {windTurbines.length > 0 && (
-                <Accordion>
+                <Accordion defaultExpanded>
                     <AccordionSummary
                         expandIcon={<ExpandMore/>}
                         id="wind-turbines"
@@ -100,7 +100,7 @@ export const LeftDrawer = () => {
             )}
 
             {pvs.length > 0 && (
-                <Accordion>
+                <Accordion defaultExpanded>
                     <AccordionSummary
                         expandIcon={<ExpandMore/>}
                         id="pvs"
@@ -126,7 +126,7 @@ export const LeftDrawer = () => {
             )}
 
             {biogasPowerPlants.length > 0 && (
-                <Accordion>
+                <Accordion defaultExpanded>
                     <AccordionSummary
                         expandIcon={<ExpandMore/>}
                         id="biogas-power-plants"

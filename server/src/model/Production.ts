@@ -1,4 +1,4 @@
 export interface Production {
     producedElectricity: number;
-    proucedHeat: number;
+    producedHeat: number;
 }

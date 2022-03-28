@@ -34,7 +34,7 @@ export class PvProductionSimulator {
             date,
             production: {
                 producedElectricity: pv.power(irradiation.get(date)),
-                proucedHeat: 0,
+                producedHeat: 0,
             },
         }));
     }

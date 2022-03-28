@@ -32,7 +32,7 @@ export class WindProductionSimulator {
             date,
             production: {
                 producedElectricity: windTurbine.power(windiness.get(date)),
-                proucedHeat: 0,
+                producedHeat: 0,
             },
         }));
     }
