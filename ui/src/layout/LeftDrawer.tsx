@@ -1,5 +1,7 @@
+import React, { PropsWithChildren, useContext } from 'react';
 import {
-    Accordion as MuiAccordion, AccordionDetails as MuiAccordionDetails,
+    Accordion as MuiAccordion,
+    AccordionDetails as MuiAccordionDetails,
     AccordionSummary as MuiAccordionSummary,
     Box,
     Drawer,
@@ -7,18 +9,30 @@ import {
     List,
     ListItem,
     ListItemText,
-    Typography
+    Tooltip,
+    Typography,
 } from '@mui/material';
-import React, { PropsWithChildren, useContext } from 'react';
-import { ArrowForwardIosSharp, Delete, ExpandMore } from '@mui/icons-material';
+import {
+    ArrowForwardIosSharp,
+    Delete,
+    ExpandMore,
+    Info,
+} from '@mui/icons-material';
 import { StateContext } from '../state/StateProvider';
 import { AddPowerPlant } from '../power-plants-management/AddPowerPlant';
 import { drawerWidth } from './constants';
 import styled from '@emotion/styled';
+import {
+    PowerPlant,
+    WindTurbine,
+    BiogasPlant,
+    PvEfficiency,
+    PvNominalPower,
+} from '../state/types';
 
 const Accordion = styled((props: PropsWithChildren<any>) => (
     <MuiAccordion disableGutters elevation={0} square {...props} />
-))(({theme}) => ({
+))(({ theme }) => ({
     borderTop: `1px solid ${theme.palette.divider}`,
     '&:not(:last-child)': {
         borderBottom: 0,
@@ -30,10 +44,10 @@ const Accordion = styled((props: PropsWithChildren<any>) => (
 
 const AccordionSummary = styled((props: PropsWithChildren<any>) => (
     <MuiAccordionSummary
-        expandIcon={<ArrowForwardIosSharp sx={{fontSize: '0.9rem'}}/>}
+        expandIcon={<ArrowForwardIosSharp sx={{ fontSize: '0.9rem' }} />}
         {...props}
     />
-))(({theme}) => ({
+))(({ theme }) => ({
     backgroundColor:
         theme.palette.mode === 'dark'
             ? 'rgba(255, 255, 255, .05)'
@@ -47,13 +61,66 @@ const AccordionSummary = styled((props: PropsWithChildren<any>) => (
     },
 }));
 
-const AccordionDetails = styled(MuiAccordionDetails)(({theme}) => ({
+const WindTurbineTooltip = (p: WindTurbine) => (
+    <Box>
+        <Typography>{p.id}</Typography>
+        <Typography>Wysokość: {p.height}m</Typography>
+        <Typography>Współczynnik szorstkości: {p.roughnessFactor}</Typography>
+        <Typography>Lokalizacja lat: {p.location.lat} </Typography>
+        <Typography>Lokalizacja lng: {p.location.lng}</Typography>
+    </Box>
+);
+
+const PvTooltip = (p: PvNominalPower | PvEfficiency) => (
+    <Box>
+        <Typography>{p.id}</Typography>
+        <Typography>Kąt nachylenia: {p.angle}°</Typography>
+        <Typography>Azymut: {p.azimuth}°</Typography>
+        <Typography>Lokalizacja lat: {p.location.lat} </Typography>
+        <Typography>Lokalizacja lng: {p.location.lng}</Typography>
+        {p.type === 'PV_POWER' && (
+            <Typography>Moc nominalna: {p.power} Wp</Typography>
+        )}
+        {p.type === 'PV_EFFICIENCY' && (
+            <Typography>Sprawność: {p.efficiency}%</Typography>
+        )}
+        {p.type === 'PV_EFFICIENCY' && (
+            <Typography>
+                Powierzchnia: {p.area} m<sup>2</sup>
+            </Typography>
+        )}
+    </Box>
+);
+
+const BiogasTooltip = (p: BiogasPlant) => (
+    <Box>
+        <Typography>{p.id}</Typography>
+        <Typography>
+            Strumien metanu: {p.methanePerHour} m<sup>3</sup>/h
+        </Typography>
+        <Typography>Kaloryczność metanu: {p.methaneCaloricValue}</Typography>
+        <Typography>
+            Sprawność generatora elektrycznego:{' '}
+            {p.electricityGeneratorEfficiency}%
+        </Typography>
+        <Typography>
+            Sprawność generatora cieplnego: {p.heatGeneratorEfficiency}%
+        </Typography>
+        <Typography>
+            Zużycie własne elektryczności: {p.ownElectricityConsumption}%
+        </Typography>
+        <Typography>Zużycie własne ciepła: {p.ownHeatConsumption}%</Typography>
+    </Box>
+);
+
+const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
     padding: 16,
     borderTop: '1px solid rgba(0, 0, 0, .125)',
 }));
 
 export const LeftDrawer = () => {
-    const {windTurbines, pvs, biogasPowerPlants, deletePowerPlant} = useContext(StateContext);
+    const { windTurbines, pvs, biogasPowerPlants, deletePowerPlant } =
+        useContext(StateContext);
 
     return (
         <Drawer
@@ -68,88 +135,103 @@ export const LeftDrawer = () => {
             variant="permanent"
             anchor="left"
         >
-            <Box display="flex" alignItems="center" justifyContent="space-between" p={2}>
+            <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                p={2}
+            >
                 <Typography variant="subtitle1">Instalacje OZE</Typography>
-                <AddPowerPlant/>
+                <AddPowerPlant />
             </Box>
 
-            {windTurbines.length > 0 && (
-                <Accordion defaultExpanded>
-                    <AccordionSummary
-                        expandIcon={<ExpandMore/>}
-                        id="wind-turbines"
-                    >
-                        Turbiny wiatrowe ({windTurbines.length})
-                    </AccordionSummary>
-                    <AccordionDetails>
-                        <List dense>
-                            {windTurbines.map(turbine => (
-                                <ListItem key={turbine.id}>
-                                    <ListItemText
-                                        primary={turbine.id}
-                                        secondary={`Moc nominalna: ${Math.max(...Object.values(turbine.characteristic))}`}
-                                    />
-                                    <IconButton onClick={() => deletePowerPlant(turbine.id)}>
-                                        <Delete/>
-                                    </IconButton>
-                                </ListItem>
-                            ))}
-                        </List>
-                    </AccordionDetails>
-                </Accordion>
-            )}
+            <Panel
+                title="Turbiny wiatrowe"
+                plants={windTurbines}
+                onDelete={deletePowerPlant}
+                subtitleGen={(p) =>
+                    `Moc nominalna: ${Math.max(
+                        ...Object.values(p.characteristic)
+                    )}`
+                }
+                tooltipGen={WindTurbineTooltip}
+            />
 
-            {pvs.length > 0 && (
-                <Accordion defaultExpanded>
-                    <AccordionSummary
-                        expandIcon={<ExpandMore/>}
-                        id="pvs"
-                    >
-                        Instalacje PV ({pvs.length})
-                    </AccordionSummary>
-                    <AccordionDetails>
-                        <List dense>
-                            {pvs.map(pv => (
-                                <ListItem key={pv.id}>
-                                    <ListItemText
-                                        primary={pv.id}
-                                        secondary={pv.type === 'PV_POWER' ? `Moc nominalna: ${pv.power}` : pv.type === 'PV_EFFICIENCY' ? `Sprawność: ${pv.efficiency}` : undefined}
-                                    />
-                                    <IconButton onClick={() => deletePowerPlant(pv.id)}>
-                                        <Delete/>
-                                    </IconButton>
-                                </ListItem>
-                            ))}
-                        </List>
-                    </AccordionDetails>
-                </Accordion>
-            )}
+            <Panel
+                title="Instalacje PV"
+                plants={pvs}
+                onDelete={deletePowerPlant}
+                subtitleGen={(p) =>
+                    p.type === 'PV_POWER'
+                        ? `Moc nominalna: ${p.power}`
+                        : p.type === 'PV_EFFICIENCY'
+                        ? `Sprawność: ${p.efficiency}`
+                        : undefined
+                }
+                tooltipGen={PvTooltip}
+            />
 
-            {biogasPowerPlants.length > 0 && (
-                <Accordion defaultExpanded>
-                    <AccordionSummary
-                        expandIcon={<ExpandMore/>}
-                        id="biogas-power-plants"
-                    >
-                        Biogazownie ({biogasPowerPlants.length})
-                    </AccordionSummary>
-                    <AccordionDetails>
-                        <List dense>
-                            {biogasPowerPlants.map(plant => (
-                                <ListItem key={plant.id}>
-                                    <ListItemText
-                                        primary={plant.id}
-                                        secondary={`Metan: ${plant.methanePerHour} m3/h`}
-                                    />
-                                    <IconButton onClick={() => deletePowerPlant(plant.id)}>
-                                        <Delete/>
-                                    </IconButton>
-                                </ListItem>
-                            ))}
-                        </List>
-                    </AccordionDetails>
-                </Accordion>
-            )}
+            <Panel
+                title="Biogazownie"
+                plants={biogasPowerPlants}
+                onDelete={deletePowerPlant}
+                subtitleGen={(p) => `Metan: ${p.methanePerHour} m3/h`}
+                tooltipGen={BiogasTooltip}
+            />
         </Drawer>
-    )
+    );
+};
+
+interface PanelProps<T extends PowerPlant> {
+    plants: T[];
+    title: string;
+    subtitleGen: (plant: T) => string | undefined;
+    tooltipGen: (plant: T) => React.ReactFragment;
+    onDelete: (id: string) => void;
 }
+
+const Panel = <T extends PowerPlant>({
+    plants,
+    title,
+    subtitleGen,
+    tooltipGen,
+    onDelete,
+}: PanelProps<T>) => {
+    if (plants.length === 0) {
+        return null;
+    }
+    return (
+        <Accordion defaultExpanded>
+            <AccordionSummary
+                expandIcon={<ExpandMore />}
+                id={`${title}-power-plants`}
+            >
+                {title} ({plants.length})
+            </AccordionSummary>
+            <AccordionDetails>
+                <List dense>
+                    {plants.map((plant) => (
+                        <ListItem key={plant.id}>
+                            <ListItemText
+                                primary={plant.id}
+                                secondary={subtitleGen(plant)}
+                            />
+                            <IconButton onClick={() => onDelete(plant.id)}>
+                                <Delete />
+                            </IconButton>
+                            <Tooltip
+                                title={tooltipGen(plant)}
+                                arrow
+                                placement="right"
+                            >
+                                <IconButton>
+                                    <Info />
+                                </IconButton>
+                            </Tooltip>
+                        </ListItem>
+                    ))}
+                </List>
+            </AccordionDetails>
+        </Accordion>
+    );
+};
