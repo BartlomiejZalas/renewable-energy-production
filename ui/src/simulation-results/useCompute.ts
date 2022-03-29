@@ -3,18 +3,22 @@ import { useContext } from 'react';
 import { StateContext } from '../state/StateProvider';
 
 export const useCompute = () => {
-    const {powerPlants, setResult} = useContext(StateContext);
+    const { powerPlants, setResult, globalConfiguration, setLoadingStatus } =
+        useContext(StateContext);
 
-    const handleCompute = async (onStatusChange: (status: 'LOADING' | 'IDLE' | 'ERROR') => void) => {
+    const handleCompute = async () => {
         try {
-            onStatusChange('LOADING');
-            const result = await SimulatorApi.simulate(2019, powerPlants);
+            setLoadingStatus('LOADING');
+            const result = await SimulatorApi.simulate(
+                globalConfiguration.year,
+                powerPlants
+            );
             setResult(result);
-            onStatusChange('IDLE');
+            setLoadingStatus('IDLE');
         } catch (e) {
             console.error(e);
-            onStatusChange('ERROR');
+            setLoadingStatus('ERROR');
         }
     };
-    return {handleCompute}
-}
+    return { handleCompute };
+};
