@@ -33,6 +33,7 @@ interface State {
     addPvEfficiency: (pvEfficiency: Omit<PvEfficiency, 'type' | 'color'>) => void;
     addBiogasPlant: (biogasPlant: Omit<BiogasPlant, 'type' | 'color'>) => void;
     deletePowerPlant: (id: string) => void;
+    editPowerPlant: (id: string, powerPlant: Omit<PowerPlant, 'type' | 'color'>) => void;
     result: null | Result;
     setResult: (result: Result | null) => void;
     getColorById: (id: string) => string;
@@ -61,6 +62,7 @@ const initialValue = {
     addPvEfficiency: CNI,
     addBiogasPlant: CNI,
     deletePowerPlant: CNI,
+    editPowerPlant: CNI,
     result: null,
     setResult: CNI,
     getColorById: CNI,
@@ -185,6 +187,7 @@ export const StateProvider: React.FC = ({children}) => {
                 addPvEfficiency,
                 addWindTurbine,
                 deletePowerPlant,
+                editPowerPlant,
                 plantIds,
                 setResult,
                 result,

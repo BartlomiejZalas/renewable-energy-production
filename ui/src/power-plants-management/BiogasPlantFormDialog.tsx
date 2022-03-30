@@ -10,10 +10,13 @@ import { Formik } from 'formik';
 import { useContext } from 'react';
 import { StateContext } from '../state/StateProvider';
 import { object, string, number } from 'yup';
+import { BiogasPlant } from '../state/types';
 
 interface Props {
     open: boolean;
     onClose: () => void;
+    onSave: (windTurbine: Omit<BiogasPlant, 'type' | 'color'>) => void;
+    initialValues?: Values;
 }
 
 interface Values {
@@ -37,13 +40,15 @@ const validationSchema = (existingIds: string[]) =>
         ownElectricityConsumption: number().required().min(0).max(100),
     });
 
-export const AddBiogasPlant: React.FC<Props> = (props) => {
+export const BiogasPlantFormDialog: React.FC<Props> = ({open, onClose, onSave, initialValues}) => {
     const {addBiogasPlant, plantIds} = useContext(StateContext);
+    const existingIds = initialValues ? plantIds.filter(id => id !== initialValues.id) : plantIds;
+
     return (
-        <Dialog {...props} title="Dodaj biogazwonię">
+        <Dialog open={open} onClose={onClose} title="Dodaj biogazwonię">
             <Formik<Values>
                 validateOnChange={false}
-                initialValues={{
+                initialValues={initialValues || {
                     id: '',
                     methanePerHour: 0,
                     methaneCaloricValue: 0,
@@ -52,11 +57,11 @@ export const AddBiogasPlant: React.FC<Props> = (props) => {
                     ownHeatConsumption: 0,
                     ownElectricityConsumption: 0,
                 }}
-                validationSchema={validationSchema(plantIds)}
+                validationSchema={validationSchema(existingIds)}
                 onSubmit={(values, {setSubmitting}) => {
-                    addBiogasPlant(values);
+                    onSave(values);
                     setSubmitting(false);
-                    props.onClose();
+                    onClose();
                 }}
             >
                 {({
@@ -84,7 +89,7 @@ export const AddBiogasPlant: React.FC<Props> = (props) => {
 
                     return (
                         <form onSubmit={handleSubmit}>
-                            <TextField label="Nazwa" {...commonProps('id')} />
+                            <TextField label="Nazwa" {...commonProps('id')} disabled={Boolean(initialValues)}/>
 
                             <TextField
                                 label={
@@ -118,7 +123,7 @@ export const AddBiogasPlant: React.FC<Props> = (props) => {
                             />
                             <Divider sx={{py: 2, mb: 2}}/>
                             <Box display="flex" justifyContent="flex-end">
-                                <Button onClick={props.onClose}>Anuluj</Button>
+                                <Button onClick={onClose}>Anuluj</Button>
                                 <Button
                                     variant="contained"
                                     disabled={isSubmitting}

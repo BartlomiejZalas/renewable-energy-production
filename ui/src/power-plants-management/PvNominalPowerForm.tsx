@@ -10,12 +10,15 @@ import { Formik } from 'formik';
 import { useContext } from 'react';
 import { StateContext } from '../state/StateProvider';
 import { object, string, number } from 'yup';
+import { PvNominalPower } from '../state/types';
 
 interface Props {
     onClose: () => void;
+    onSave: (pv: Omit<PvNominalPower, 'type' | 'color'>) => void;
+    initialValues?: PvNominalPowerFormValues;
 }
 
-interface Values {
+export interface PvNominalPowerFormValues {
     id: string;
     lat: number;
     lng: number;
@@ -34,12 +37,14 @@ const validationSchema = (existingIds: string[]) =>
         angle: number().required().min(0).max(180),
     });
 
-export const PvNominalPowerForm: React.FC<Props> = (props) => {
-    const {addPvNominalPower, plantIds} = useContext(StateContext);
+export const PvNominalPowerForm: React.FC<Props> = ({initialValues, onClose, onSave}) => {
+    const {plantIds} = useContext(StateContext);
+    const existingIds = initialValues ? plantIds.filter(id => id !== initialValues.id) : plantIds;
+
     return (
-        <Formik<Values>
+        <Formik<PvNominalPowerFormValues>
             validateOnChange={false}
-            initialValues={{
+            initialValues={initialValues || {
                 id: '',
                 lat: 0,
                 lng: 0,
@@ -47,17 +52,17 @@ export const PvNominalPowerForm: React.FC<Props> = (props) => {
                 azimuth: 0,
                 angle: 0,
             }}
-            validationSchema={validationSchema(plantIds)}
+            validationSchema={validationSchema(existingIds)}
             onSubmit={(values, {setSubmitting}) => {
                 const {id, lat, lng, power, azimuth, angle} = values;
-                addPvNominalPower({
+                onSave({
                     id, location: {lat, lng},
                     power,
                     azimuth,
                     angle
                 });
                 setSubmitting(false);
-                props.onClose();
+                onClose();
             }}
         >
             {({
@@ -69,7 +74,7 @@ export const PvNominalPowerForm: React.FC<Props> = (props) => {
                   handleSubmit,
                   isSubmitting,
               }) => {
-                const commonProps = (name: keyof Values): TextFieldProps => ({
+                const commonProps = (name: keyof PvNominalPowerFormValues): TextFieldProps => ({
                     size: 'small',
                     fullWidth: true,
                     onChange: handleChange,
@@ -83,7 +88,7 @@ export const PvNominalPowerForm: React.FC<Props> = (props) => {
 
                 return (
                     <form onSubmit={handleSubmit}>
-                        <TextField label="Nazwa" {...commonProps('id')} />
+                        <TextField label="Nazwa" {...commonProps('id')} disabled={Boolean(initialValues)}/>
 
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={6}>
@@ -114,7 +119,7 @@ export const PvNominalPowerForm: React.FC<Props> = (props) => {
 
                         <Divider sx={{py: 2, mb: 2}}/>
                         <Box display="flex" justifyContent="flex-end">
-                            <Button onClick={props.onClose}>Anuluj</Button>
+                            <Button onClick={onClose}>Anuluj</Button>
                             <Button
                                 variant="contained"
                                 disabled={isSubmitting}

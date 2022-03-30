@@ -21,10 +21,13 @@ import {
 import { useContext } from 'react';
 import { StateContext } from '../state/StateProvider';
 import { object, string, array, number } from 'yup';
+import { WindTurbine } from '../state/types';
 
 interface Props {
     open: boolean;
     onClose: () => void;
+    onSave: (windTurbine: Omit<WindTurbine, 'type' | 'color'>) => void;
+    initialValues?: Values;
 }
 
 interface Values {
@@ -45,14 +48,15 @@ const validationSchema = (existingIds: string[]) => object({
     characteristic: array().of(number().min(0).required()),
 });
 
-export const AddWindTurbine: React.FC<Props> = (props) => {
+export const WindTurbineFormDialog: React.FC<Props> = ({onSave, open, onClose, initialValues}) => {
     const theme = useTheme();
-    const {addWindTurbine, plantIds} = useContext(StateContext);
+    const {plantIds} = useContext(StateContext);
+    const existingIds = initialValues ? plantIds.filter(id => id !== initialValues.id) : plantIds;
     return (
-        <Dialog {...props} title="Dodaj turbinę wiatrową">
+        <Dialog open={open} onClose={onClose} title="Dodaj turbinę wiatrową">
             <Formik<Values>
                 validateOnChange={false}
-                initialValues={{
+                initialValues={initialValues || {
                     id: '',
                     lat: 0,
                     lng: 0,
@@ -60,7 +64,7 @@ export const AddWindTurbine: React.FC<Props> = (props) => {
                     roughnessFactor: 0.5,
                     characteristic: Array.from(new Array(31)).map((v) => 0),
                 }}
-                validationSchema={validationSchema(plantIds)}
+                validationSchema={validationSchema(existingIds)}
                 onSubmit={(values, {setSubmitting}) => {
                     const {
                         id,
@@ -77,9 +81,9 @@ export const AddWindTurbine: React.FC<Props> = (props) => {
                         }),
                         {}
                     );
-                    addWindTurbine({id, location: {lat, lng}, height, roughnessFactor, characteristic: characteristicData});
+                    onSave({id, location: {lat, lng}, height, roughnessFactor, characteristic: characteristicData});
                     setSubmitting(false);
-                    props.onClose();
+                    onClose();
                 }}
             >
                 {({
@@ -102,12 +106,12 @@ export const AddWindTurbine: React.FC<Props> = (props) => {
                         name,
                         value: values[name],
                         helperText: errors[name],
-                        error: Boolean(errors[name] && touched[name]),
+                        error: Boolean(errors[name]),
                     });
 
                     return (
                         <form onSubmit={handleSubmit}>
-                            <TextField label="Nazwa" {...commonProps('id')}/>
+                            <TextField label="Nazwa" {...commonProps('id')} disabled={Boolean(initialValues)}/>
 
                             <Grid container spacing={2}>
                                 <Grid item xs={12} sm={6}>
@@ -144,7 +148,7 @@ export const AddWindTurbine: React.FC<Props> = (props) => {
                                     render={() =>
                                         values.characteristic.map(
                                             (_, index) => (
-                                                <Grid item xs={3} sm={2} md={1}>
+                                                <Grid item xs={3} sm={2} md={1} key={index}>
                                                     <TextField
                                                         fullWidth
                                                         size="small"
@@ -206,7 +210,7 @@ export const AddWindTurbine: React.FC<Props> = (props) => {
 
                             <Divider sx={{py: 2, mb: 2}}/>
                             <Box display="flex" justifyContent="flex-end">
-                                <Button onClick={props.onClose}>Anuluj</Button>
+                                <Button onClick={onClose}>Anuluj</Button>
                                 <Button
                                     variant="contained"
                                     disabled={isSubmitting}

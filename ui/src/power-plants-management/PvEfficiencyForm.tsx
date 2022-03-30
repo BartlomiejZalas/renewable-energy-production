@@ -1,3 +1,4 @@
+import React from 'react';
 import {
     Box,
     Button,
@@ -10,12 +11,15 @@ import { Formik } from 'formik';
 import { useContext } from 'react';
 import { StateContext } from '../state/StateProvider';
 import { object, string, number } from 'yup';
+import { PvEfficiency } from '../state/types';
 
 interface Props {
     onClose: () => void;
+    onSave: (pv: Omit<PvEfficiency, 'type' | 'color'>) => void;
+    initialValues?: PvEfficiencyFormValues;
 }
 
-interface Values {
+export interface PvEfficiencyFormValues {
     id: string;
     lat: number;
     lng: number;
@@ -36,12 +40,13 @@ const validationSchema = (existingIds: string[]) =>
         angle: number().required().min(0).max(180),
     });
 
-export const PvAreaForm: React.FC<Props> = (props) => {
-    const {addPvEfficiency, plantIds} = useContext(StateContext);
+export const PvEfficiencyForm: React.FC<Props> = ({onClose, onSave, initialValues}) => {
+    const {plantIds} = useContext(StateContext);
+    const existingIds = initialValues ? plantIds.filter(id => id !== initialValues.id) : plantIds;
     return (
-        <Formik<Values>
+        <Formik<PvEfficiencyFormValues>
             validateOnChange={false}
-            initialValues={{
+            initialValues={initialValues || {
                 id: '',
                 lat: 0,
                 lng: 0,
@@ -50,11 +55,11 @@ export const PvAreaForm: React.FC<Props> = (props) => {
                 azimuth: 0,
                 angle: 0,
             }}
-            validationSchema={validationSchema(plantIds)}
+            validationSchema={validationSchema(existingIds)}
             onSubmit={(values, {setSubmitting}) => {
                 const {id, lat, lng, area, efficiency, azimuth, angle} =
                     values;
-                addPvEfficiency({
+                onSave({
                     id,
                     location: {lat, lng},
                     area,
@@ -63,7 +68,7 @@ export const PvAreaForm: React.FC<Props> = (props) => {
                     angle
                 });
                 setSubmitting(false);
-                props.onClose();
+                onClose();
             }}
         >
             {({
@@ -75,7 +80,7 @@ export const PvAreaForm: React.FC<Props> = (props) => {
                   handleSubmit,
                   isSubmitting,
               }) => {
-                const commonProps = (name: keyof Values): TextFieldProps => ({
+                const commonProps = (name: keyof PvEfficiencyFormValues): TextFieldProps => ({
                     size: 'small',
                     fullWidth: true,
                     onChange: handleChange,
@@ -89,7 +94,7 @@ export const PvAreaForm: React.FC<Props> = (props) => {
 
                 return (
                     <form onSubmit={handleSubmit}>
-                        <TextField label="Nazwa" {...commonProps('id')} />
+                        <TextField label="Nazwa" {...commonProps('id')} disabled={Boolean(initialValues)} />
 
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={6}>
@@ -125,7 +130,7 @@ export const PvAreaForm: React.FC<Props> = (props) => {
 
                         <Divider sx={{py: 2, mb: 2}}/>
                         <Box display="flex" justifyContent="flex-end">
-                            <Button onClick={props.onClose}>Anuluj</Button>
+                            <Button onClick={onClose}>Anuluj</Button>
                             <Button
                                 variant="contained"
                                 disabled={isSubmitting}

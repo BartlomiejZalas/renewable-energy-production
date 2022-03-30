@@ -5,10 +5,11 @@ import {
     WindPower,
 } from '@mui/icons-material';
 import { Button, MenuItem, Menu, Typography } from '@mui/material';
-import { useState } from 'react';
-import { AddBiogasPlant } from './AddBiogasPlant';
-import { AddPv } from './AddPv';
-import { AddWindTurbine } from './AddWindTurbine';
+import { useContext, useState } from 'react';
+import { BiogasPlantFormDialog } from './BiogasPlantFormDialog';
+import { AddPvDialog } from './AddPvDialog';
+import { WindTurbineFormDialog } from './WindTurbineFormDialog';
+import { StateContext } from '../state/StateProvider';
 
 enum Modal {
     NONE,
@@ -22,6 +23,7 @@ export const AddPowerPlant = () => {
     const handleClose = () => setAnchorEl(null);
 
     const [showModal, setModal] = useState(Modal.NONE);
+    const {addWindTurbine, addBiogasPlant} = useContext(StateContext);
 
     return (
         <>
@@ -65,17 +67,19 @@ export const AddPowerPlant = () => {
                     <Typography ml={2}>Biogazownia</Typography>
                 </MenuItem>
             </Menu>
-            <AddWindTurbine
+            <WindTurbineFormDialog
                 open={showModal === Modal.WIND}
                 onClose={() => setModal(Modal.NONE)}
+                onSave={addWindTurbine}
             />
-            <AddPv
+            <AddPvDialog
                 open={showModal === Modal.PV}
                 onClose={() => setModal(Modal.NONE)}
             />
-            <AddBiogasPlant
+            <BiogasPlantFormDialog
                 open={showModal === Modal.BIOGAS}
                 onClose={() => setModal(Modal.NONE)}
+                onSave={addBiogasPlant}
             />
         </>
     );

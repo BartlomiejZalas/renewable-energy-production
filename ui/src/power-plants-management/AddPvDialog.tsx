@@ -5,11 +5,12 @@ import {
     Radio,
     RadioGroup,
 } from '@mui/material';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 
 import { Dialog } from '../common/Dialog';
-import { PvAreaForm } from './PvAreaForm';
+import { PvEfficiencyForm } from './PvEfficiencyForm';
 import { PvNominalPowerForm } from './PvNominalPowerForm';
+import { StateContext } from '../state/StateProvider';
 
 interface Props {
     open: boolean;
@@ -21,7 +22,8 @@ enum FormType {
     AREA = 'AREA',
 }
 
-export const AddPv: React.FC<Props> = (props) => {
+export const AddPvDialog: React.FC<Props> = (props) => {
+    const {addPvEfficiency, addPvNominalPower} = useContext(StateContext);
     const [form, setForm] = useState(FormType.POWER);
     return (
         <Dialog {...props} title="Dodaj instalację PV">
@@ -34,21 +36,23 @@ export const AddPv: React.FC<Props> = (props) => {
                 >
                     <FormControlLabel
                         value={FormType.POWER}
-                        control={<Radio />}
+                        control={<Radio/>}
                         label="Mocy nominalnej"
                     />
                     <FormControlLabel
                         value={FormType.AREA}
-                        control={<Radio />}
+                        control={<Radio/>}
                         label="Powierzchni i sprawności"
                     />
                 </RadioGroup>
             </FormControl>
 
             {form === FormType.POWER && (
-                <PvNominalPowerForm onClose={props.onClose} />
+                <PvNominalPowerForm onClose={props.onClose} onSave={addPvNominalPower}/>
             )}
-            {form === FormType.AREA && <PvAreaForm onClose={props.onClose} />}
+            {form === FormType.AREA && (
+                <PvEfficiencyForm onClose={props.onClose} onSave={addPvEfficiency}/>
+            )}
         </Dialog>
     );
 };

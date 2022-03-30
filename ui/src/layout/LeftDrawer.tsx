@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, useContext } from 'react';
+import React, { PropsWithChildren, useContext, useState } from 'react';
 import {
     Accordion as MuiAccordion,
     AccordionDetails as MuiAccordionDetails,
@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import {
     ArrowForwardIosSharp,
-    Delete,
+    Delete, Edit,
     ExpandMore,
     Info,
 } from '@mui/icons-material';
@@ -29,10 +29,14 @@ import {
     PvEfficiency,
     PvNominalPower,
 } from '../state/types';
+import { WindTurbineFormDialog } from '../power-plants-management/WindTurbineFormDialog';
+import { BiogasPlantFormDialog } from '../power-plants-management/BiogasPlantFormDialog';
+import { PvNominalPowerDialog } from '../power-plants-management/PvNominalPowerDialog';
+import { PvEfficiencyDialog } from '../power-plants-management/PvEfficiencyDialog';
 
 const Accordion = styled((props: PropsWithChildren<any>) => (
     <MuiAccordion disableGutters elevation={0} square {...props} />
-))(({ theme }) => ({
+))(({theme}) => ({
     borderTop: `1px solid ${theme.palette.divider}`,
     '&:not(:last-child)': {
         borderBottom: 0,
@@ -44,10 +48,10 @@ const Accordion = styled((props: PropsWithChildren<any>) => (
 
 const AccordionSummary = styled((props: PropsWithChildren<any>) => (
     <MuiAccordionSummary
-        expandIcon={<ArrowForwardIosSharp sx={{ fontSize: '0.9rem' }} />}
+        expandIcon={<ArrowForwardIosSharp sx={{fontSize: '0.9rem'}}/>}
         {...props}
     />
-))(({ theme }) => ({
+))(({theme}) => ({
     backgroundColor:
         theme.palette.mode === 'dark'
             ? 'rgba(255, 255, 255, .05)'
@@ -113,14 +117,30 @@ const BiogasTooltip = (p: BiogasPlant) => (
     </Box>
 );
 
-const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
+const AccordionDetails = styled(MuiAccordionDetails)(({theme}) => ({
     padding: 16,
     borderTop: '1px solid rgba(0, 0, 0, .125)',
 }));
 
+enum Modal {
+    NONE,
+    PV_NOMINAL,
+    PV_EFFICIENCY,
+    WIND,
+    BIOGAS,
+}
+
 export const LeftDrawer = () => {
-    const { windTurbines, pvs, biogasPowerPlants, deletePowerPlant } =
+    const {windTurbines, pvs, biogasPowerPlants, deletePowerPlant, editPowerPlant} =
         useContext(StateContext);
+
+    const [showModal, setModal] = useState(Modal.NONE);
+    const [powerPlantToEdit, setPowerPlantToEdit] = useState<PowerPlant | null>(null);
+
+    const openPowerPlantEdition = (type: Modal, powerPlant: PowerPlant) => {
+        setPowerPlantToEdit(powerPlant);
+        setModal(type);
+    }
 
     return (
         <Drawer
@@ -142,7 +162,7 @@ export const LeftDrawer = () => {
                 p={2}
             >
                 <Typography variant="subtitle1">Instalacje OZE</Typography>
-                <AddPowerPlant />
+                <AddPowerPlant/>
             </Box>
 
             <Panel
@@ -155,6 +175,7 @@ export const LeftDrawer = () => {
                     )}`
                 }
                 tooltipGen={WindTurbineTooltip}
+                onEdit={(p) => openPowerPlantEdition(Modal.WIND, p)}
             />
 
             <Panel
@@ -165,10 +186,18 @@ export const LeftDrawer = () => {
                     p.type === 'PV_POWER'
                         ? `Moc nominalna: ${p.power}`
                         : p.type === 'PV_EFFICIENCY'
-                        ? `Sprawność: ${p.efficiency}`
-                        : undefined
+                            ? `Sprawność: ${p.efficiency}`
+                            : undefined
                 }
                 tooltipGen={PvTooltip}
+                onEdit={(p) => {
+                    if (p.type === 'PV_POWER') {
+                        openPowerPlantEdition(Modal.PV_NOMINAL, p)
+                    }
+                    if (p.type === 'PV_EFFICIENCY') {
+                        openPowerPlantEdition(Modal.PV_EFFICIENCY, p)
+                    }
+                }}
             />
 
             <Panel
@@ -177,7 +206,37 @@ export const LeftDrawer = () => {
                 onDelete={deletePowerPlant}
                 subtitleGen={(p) => `Metan: ${p.methanePerHour} m3/h`}
                 tooltipGen={BiogasTooltip}
+                onEdit={(p) => openPowerPlantEdition(Modal.BIOGAS, p)}
             />
+
+            <WindTurbineFormDialog
+                open={showModal === Modal.WIND}
+                onClose={() => setModal(Modal.NONE)}
+                onSave={(p) => editPowerPlant(p.id, p)}
+                initialValues={powerPlantToEdit && powerPlantToEdit.type === 'WIND' ? {
+                    ...powerPlantToEdit, ...powerPlantToEdit.location,
+                    characteristic: Object.values(powerPlantToEdit.characteristic)
+                } : undefined}
+            />
+            <BiogasPlantFormDialog
+                open={showModal === Modal.BIOGAS}
+                onClose={() => setModal(Modal.NONE)}
+                onSave={(p) => editPowerPlant(p.id, p)}
+                initialValues={powerPlantToEdit && powerPlantToEdit.type === 'BIOGAS_PLANT' ? powerPlantToEdit : undefined}
+            />
+            <PvNominalPowerDialog
+                open={showModal === Modal.PV_NOMINAL}
+                onClose={() => setModal(Modal.NONE)}
+                onSave={(p) => editPowerPlant(p.id, p)}
+                initialValues={powerPlantToEdit && powerPlantToEdit.type === 'PV_POWER' ? {...powerPlantToEdit, ...powerPlantToEdit.location} : undefined}
+            />
+            <PvEfficiencyDialog
+                open={showModal === Modal.PV_EFFICIENCY}
+                onClose={() => setModal(Modal.NONE)}
+                onSave={(p) => editPowerPlant(p.id, p)}
+                initialValues={powerPlantToEdit && powerPlantToEdit.type === 'PV_EFFICIENCY' ? {...powerPlantToEdit, ...powerPlantToEdit.location} : undefined}
+            />
+
         </Drawer>
     );
 };
@@ -188,22 +247,24 @@ interface PanelProps<T extends PowerPlant> {
     subtitleGen: (plant: T) => string | undefined;
     tooltipGen: (plant: T) => React.ReactFragment;
     onDelete: (id: string) => void;
+    onEdit: (plant: T) => void;
 }
 
 const Panel = <T extends PowerPlant>({
-    plants,
-    title,
-    subtitleGen,
-    tooltipGen,
-    onDelete,
-}: PanelProps<T>) => {
+                                         plants,
+                                         title,
+                                         subtitleGen,
+                                         tooltipGen,
+                                         onDelete,
+                                         onEdit,
+                                     }: PanelProps<T>) => {
     if (plants.length === 0) {
         return null;
     }
     return (
         <Accordion defaultExpanded>
             <AccordionSummary
-                expandIcon={<ExpandMore />}
+                expandIcon={<ExpandMore/>}
                 id={`${title}-power-plants`}
             >
                 {title} ({plants.length})
@@ -216,8 +277,11 @@ const Panel = <T extends PowerPlant>({
                                 primary={plant.id}
                                 secondary={subtitleGen(plant)}
                             />
+                            <IconButton onClick={() => onEdit(plant)}>
+                                <Edit/>
+                            </IconButton>
                             <IconButton onClick={() => onDelete(plant.id)}>
-                                <Delete />
+                                <Delete/>
                             </IconButton>
                             <Tooltip
                                 title={tooltipGen(plant)}
@@ -225,7 +289,7 @@ const Panel = <T extends PowerPlant>({
                                 placement="right"
                             >
                                 <IconButton>
-                                    <Info />
+                                    <Info/>
                                 </IconButton>
                             </Tooltip>
                         </ListItem>
