@@ -9,7 +9,7 @@ import {
     Result,
 } from './types';
 import {
-    generateBiogasColor,
+    generateBiogasColor, generatePowerPlantColor,
     generateSolarColor,
     generateWindColor,
 } from './colors';
@@ -22,14 +22,16 @@ interface GlobalConfiguration {
 
 interface State {
     powerPlants: PowerPlant[];
+    setPowerPlants: (powerPlants: PowerPlant[]) => void;
+    powerPlantsVersion: number;
     windTurbines: WindTurbine[];
     pvs: Array<PvNominalPower | PvEfficiency>;
     biogasPowerPlants: BiogasPlant[];
     plantIds: string[];
-    addWindTurbine: (windTurbine: Omit<WindTurbine, 'type'>) => void;
-    addPvNominalPower: (pvNominalPower: Omit<PvNominalPower, 'type'>) => void;
-    addPvEfficiency: (pvEfficiency: Omit<PvEfficiency, 'type'>) => void;
-    addBiogasPlant: (biogasPlant: Omit<BiogasPlant, 'type'>) => void;
+    addWindTurbine: (windTurbine: Omit<WindTurbine, 'type' | 'color'>) => void;
+    addPvNominalPower: (pvNominalPower: Omit<PvNominalPower, 'type' | 'color'>) => void;
+    addPvEfficiency: (pvEfficiency: Omit<PvEfficiency, 'type' | 'color'>) => void;
+    addBiogasPlant: (biogasPlant: Omit<BiogasPlant, 'type' | 'color'>) => void;
     deletePowerPlant: (id: string) => void;
     result: null | Result;
     setResult: (result: Result | null) => void;
@@ -48,6 +50,8 @@ const CNI = () => {
 
 const initialValue = {
     powerPlants: [],
+    setPowerPlants: CNI,
+    powerPlantsVersion: 0,
     windTurbines: [],
     pvs: [],
     biogasPowerPlants: [],
@@ -60,7 +64,7 @@ const initialValue = {
     result: null,
     setResult: CNI,
     getColorById: CNI,
-    globalConfiguration: { year: 2020, showElectricity: true, showHeat: true },
+    globalConfiguration: {year: 2020, showElectricity: true, showHeat: true},
     setYear: CNI,
     setShowElectricity: CNI,
     setShowHeat: CNI,
@@ -70,34 +74,14 @@ const initialValue = {
 
 export const StateContext = createContext<State>(initialValue);
 
-export const StateProvider: React.FC = ({ children }) => {
-    const testTurbine: WindTurbine = {
-        type: 'WIND',
-        id: 'Super Turbina',
-        height: 40,
-        characteristic: { 0: 200, 1: 300, 2: 400, 3: 1000 },
-        location: { lat: 51.0, lng: 17.0 },
-        roughnessFactor: 0.5,
-        color: '#87CEFA',
-    };
-    const pv1: PvNominalPower = {
-        type: 'PV_POWER',
-        power: 3000,
-        id: 'Super PV',
-        angle: 15,
-        azimuth: 10,
-        location: { lat: 51.0, lng: 17.0 },
-        color: '#FF7F50',
-    };
-
+export const StateProvider: React.FC = ({children}) => {
     const [loadingStatus, setLoadingStatus] = useState<'LOADING' | 'ERROR' | 'IDLE'>('IDLE');
-    const [powerPlants, setPowerPlants] = useState<PowerPlant[]>([
-        testTurbine,
-        pv1,
-    ]);
+    const [powerPlants, setPowerPlants] = useState<PowerPlant[]>([]);
+    const [powerPlantsVersion, setPowerPlantsVersion] = useState(0);
     const [result, setResult] = useState<Result | null>(initialValue.result);
-    const [globalConfiguration, setGlobalConfiguration] =
-        useState<GlobalConfiguration>(initialValue.globalConfiguration);
+    const [globalConfiguration, setGlobalConfiguration] = useState<GlobalConfiguration>(initialValue.globalConfiguration);
+
+    const updatePowerPlantsVersion = () => setPowerPlantsVersion(v => v + 1);
 
     const addWindTurbine = (
         windTurbine: Omit<WindTurbine, 'type' | 'color'>
@@ -107,9 +91,10 @@ export const StateProvider: React.FC = ({ children }) => {
             {
                 ...windTurbine,
                 type: 'WIND',
-                color: generateWindColor(windTurbines.length),
+                color: generatePowerPlantColor(windTurbines.length, 'WIND'),
             },
         ]);
+        updatePowerPlantsVersion();
     };
 
     const addPvNominalPower = (
@@ -123,9 +108,10 @@ export const StateProvider: React.FC = ({ children }) => {
                 color: generateSolarColor(pvs.length),
             },
         ]);
+        updatePowerPlantsVersion();
     };
 
-    const addPvEfficiency = (pvEfficiency: Omit<PvEfficiency, 'type'>) => {
+    const addPvEfficiency = (pvEfficiency: Omit<PvEfficiency, 'type' | 'color'>) => {
         setPowerPlants((plants) => [
             ...plants,
             {
@@ -134,9 +120,10 @@ export const StateProvider: React.FC = ({ children }) => {
                 color: generateSolarColor(pvs.length),
             },
         ]);
+        updatePowerPlantsVersion();
     };
 
-    const addBiogasPlant = (biogasPlant: Omit<BiogasPlant, 'type'>) => {
+    const addBiogasPlant = (biogasPlant: Omit<BiogasPlant, 'type' | 'color'>) => {
         setPowerPlants((plants) => [
             ...plants,
             {
@@ -145,10 +132,20 @@ export const StateProvider: React.FC = ({ children }) => {
                 color: generateBiogasColor(biogasPowerPlants.length),
             },
         ]);
+        updatePowerPlantsVersion();
+    };
+
+    const editPowerPlant = (
+        id: string,
+        updated: Omit<PowerPlant, 'type' | 'color'>
+    ) => {
+        setPowerPlants((plants) => plants.map(p => p.id === id ? {...p, ...updated} : p))
+        updatePowerPlantsVersion();
     };
 
     const deletePowerPlant = (id: string) => {
         setPowerPlants((powerPlants) => powerPlants.filter((p) => p.id !== id));
+        updatePowerPlantsVersion();
     };
 
     const plantIds = powerPlants.map((p) => p.id);
@@ -167,17 +164,18 @@ export const StateProvider: React.FC = ({ children }) => {
         powerPlants.find((p) => p.id === id)?.color || '#000000';
 
     const setShowHeat = (showHeat: boolean) =>
-        setGlobalConfiguration((c) => ({ ...c, showHeat }));
+        setGlobalConfiguration((c) => ({...c, showHeat}));
 
     const setShowElectricity = (showElectricity: boolean) =>
-        setGlobalConfiguration((c) => ({ ...c, showElectricity }));
+        setGlobalConfiguration((c) => ({...c, showElectricity}));
 
     const setYear = (year: number) =>
-        setGlobalConfiguration((c) => ({ ...c, year }));
+        setGlobalConfiguration((c) => ({...c, year}));
 
     return (
         <StateContext.Provider
             value={{
+                setPowerPlants,
                 powerPlants,
                 windTurbines,
                 pvs,
@@ -197,6 +195,7 @@ export const StateProvider: React.FC = ({ children }) => {
                 setYear,
                 loadingStatus,
                 setLoadingStatus,
+                powerPlantsVersion,
             }}
         >
             {children}

@@ -61,7 +61,7 @@ export const MonthChart: React.FC<Props> = ({ data }) => {
                     <Legend />
                     <Tooltip />
                     {plantIds.map((id) => (
-                        <>
+                        <React.Fragment key={id}>
                             {globalConfiguration.showElectricity && (
                                 <Bar
                                     dataKey={`${id}.producedElectricity`}
@@ -80,7 +80,7 @@ export const MonthChart: React.FC<Props> = ({ data }) => {
                                     name={`${id} - ciepło`}
                                 />
                             )}
-                        </>
+                        </React.Fragment>
                     ))}
                 </BarChart>
             </ResponsiveContainer>

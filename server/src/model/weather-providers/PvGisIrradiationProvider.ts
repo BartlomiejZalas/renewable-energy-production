@@ -6,6 +6,7 @@ import {
     IrradiationRecord,
 } from './IrradiationProvider';
 import fetch from 'cross-fetch';
+import { WindRecord } from './WindProvider';
 
 interface RecordDto {
     time: string;
@@ -24,8 +25,11 @@ export class PvGisIrradiationProvider implements IrradiationProvider {
         angle: number
     ): Promise<Irradiation> {
         const apiUrl = this.prepareUrl(location, year, azimuth, angle);
-        const response = await fetch(apiUrl, {mode: 'cors'});
-        const data: ResponseDto = await response.json();
+        const response = await fetch(apiUrl);
+        const data: ResponseDto | {status: number, message: string} = await response.json();
+        if ('message' in data) {
+            throw new Error(data.message);
+        }
         const irradiationRecords: IrradiationRecord[] = data.outputs.hourly.map(
             this.mapToRecords
         );
