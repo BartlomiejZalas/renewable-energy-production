@@ -5,13 +5,15 @@ import {
     Divider,
     Grid, InputAdornment,
     TextField,
-    TextFieldProps,
+    TextFieldProps, Typography,
 } from '@mui/material';
 import { Formik } from 'formik';
 import { useContext } from 'react';
 import { StateContext } from '../state/StateProvider';
 import { object, string, number } from 'yup';
 import { PvEfficiency } from '../state/types';
+import { DEFAULT_LOCATION } from '../common/DefaultLocation';
+import { MapInput } from '../common/MapInput';
 
 interface Props {
     onClose: () => void;
@@ -21,8 +23,7 @@ interface Props {
 
 export interface PvEfficiencyFormValues {
     id: string;
-    lat: number;
-    lng: number;
+    location: { lat: number, lng: number };
     area: number;
     efficiency: number;
     azimuth: number;
@@ -32,8 +33,6 @@ export interface PvEfficiencyFormValues {
 const validationSchema = (existingIds: string[]) =>
     object({
         id: string().required().notOneOf(existingIds),
-        lat: number().required().min(0),
-        lng: number().required().min(0),
         area: number().required().min(0),
         efficiency: number().required().min(0).max(100),
         azimuth: number().required().min(0).max(360),
@@ -48,8 +47,7 @@ export const PvEfficiencyForm: React.FC<Props> = ({onClose, onSave, initialValue
             validateOnChange={false}
             initialValues={initialValues || {
                 id: '',
-                lat: 0,
-                lng: 0,
+                location: DEFAULT_LOCATION,
                 area: 0,
                 efficiency: 0,
                 azimuth: 0,
@@ -57,11 +55,11 @@ export const PvEfficiencyForm: React.FC<Props> = ({onClose, onSave, initialValue
             }}
             validationSchema={validationSchema(existingIds)}
             onSubmit={(values, {setSubmitting}) => {
-                const {id, lat, lng, area, efficiency, azimuth, angle} =
+                const {id, location, area, efficiency, azimuth, angle} =
                     values;
                 onSave({
                     id,
-                    location: {lat, lng},
+                    location,
                     area,
                     efficiency,
                     azimuth,
@@ -79,6 +77,7 @@ export const PvEfficiencyForm: React.FC<Props> = ({onClose, onSave, initialValue
                   handleBlur,
                   handleSubmit,
                   isSubmitting,
+                  setFieldValue,
               }) => {
                 const commonProps = (name: keyof PvEfficiencyFormValues): TextFieldProps => ({
                     size: 'small',
@@ -94,54 +93,58 @@ export const PvEfficiencyForm: React.FC<Props> = ({onClose, onSave, initialValue
 
                 return (
                     <form onSubmit={handleSubmit}>
-                        <TextField label="Nazwa" {...commonProps('id')} disabled={Boolean(initialValues)}/>
+
 
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={6}>
-                                <TextField
-                                    label="Lat"
-                                    {...commonProps('lat')}
+                                <Typography mb={2}>Lokalizacja</Typography>
+
+                                <MapInput
+                                    value={values.location}
+                                    onChange={(position) => {
+                                        setFieldValue('location', position);
+                                    }}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={6}>
+                                <Typography>Dane</Typography>
+
+                                <TextField label="Nazwa" {...commonProps('id')} disabled={Boolean(initialValues)}/>
+
                                 <TextField
-                                    label="Lng"
-                                    {...commonProps('lng')}
+                                    label="Powierzchnia"
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">m<sup>2</sup></InputAdornment>
+                                    }}
+                                    {...commonProps('area')}
+                                />
+
+                                <TextField
+                                    label="Sprawność"
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">%</InputAdornment>
+                                    }}
+                                    {...commonProps('efficiency')}
+                                />
+
+                                <TextField
+                                    label="Kąt nachylenia"
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">°</InputAdornment>
+                                    }}
+                                    {...commonProps('angle')}
+                                />
+
+                                <TextField
+                                    label="Azymut"
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">°</InputAdornment>
+                                    }}
+                                    {...commonProps('azimuth')}
                                 />
                             </Grid>
                         </Grid>
 
-                        <TextField
-                            label="Powierzchnia"
-                            InputProps={{
-                                endAdornment: <InputAdornment position="end">m<sup>2</sup></InputAdornment>
-                            }}
-                            {...commonProps('area')}
-                        />
-
-                        <TextField
-                            label="Sprawność"
-                            InputProps={{
-                                endAdornment: <InputAdornment position="end">%</InputAdornment>
-                            }}
-                            {...commonProps('efficiency')}
-                        />
-
-                        <TextField
-                            label="Kąt nachylenia"
-                            InputProps={{
-                                endAdornment: <InputAdornment position="end">°</InputAdornment>
-                            }}
-                            {...commonProps('angle')}
-                        />
-
-                        <TextField
-                            label="Azymut"
-                            InputProps={{
-                                endAdornment: <InputAdornment position="end">°</InputAdornment>
-                            }}
-                            {...commonProps('azimuth')}
-                        />
 
                         <Divider sx={{py: 2, mb: 2}}/>
                         <Box display="flex" justifyContent="flex-end">

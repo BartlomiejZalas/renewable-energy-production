@@ -4,13 +4,15 @@ import {
     Divider,
     Grid, InputAdornment,
     TextField,
-    TextFieldProps,
+    TextFieldProps, Typography,
 } from '@mui/material';
 import { Formik } from 'formik';
-import { useContext } from 'react';
+import React, { useContext } from 'react';
 import { StateContext } from '../state/StateProvider';
 import { object, string, number } from 'yup';
 import { PvNominalPower } from '../state/types';
+import { MapInput } from '../common/MapInput';
+import { DEFAULT_LOCATION } from '../common/DefaultLocation';
 
 interface Props {
     onClose: () => void;
@@ -20,8 +22,7 @@ interface Props {
 
 export interface PvNominalPowerFormValues {
     id: string;
-    lat: number;
-    lng: number;
+    location: { lat: number, lng: number };
     power: number;
     azimuth: number;
     angle: number;
@@ -30,8 +31,6 @@ export interface PvNominalPowerFormValues {
 const validationSchema = (existingIds: string[]) =>
     object({
         id: string().required().notOneOf(existingIds),
-        lat: number().required().min(0),
-        lng: number().required().min(0),
         power: number().required().min(0),
         azimuth: number().required().min(0).max(360),
         angle: number().required().min(0).max(180),
@@ -46,17 +45,17 @@ export const PvNominalPowerForm: React.FC<Props> = ({initialValues, onClose, onS
             validateOnChange={false}
             initialValues={initialValues || {
                 id: '',
-                lat: 0,
-                lng: 0,
+                location: DEFAULT_LOCATION,
                 power: 0,
                 azimuth: 0,
                 angle: 0,
             }}
             validationSchema={validationSchema(existingIds)}
             onSubmit={(values, {setSubmitting}) => {
-                const {id, lat, lng, power, azimuth, angle} = values;
+                const {id, location, power, azimuth, angle} = values;
                 onSave({
-                    id, location: {lat, lng},
+                    id,
+                    location,
                     power,
                     azimuth,
                     angle
@@ -73,6 +72,7 @@ export const PvNominalPowerForm: React.FC<Props> = ({initialValues, onClose, onS
                   handleBlur,
                   handleSubmit,
                   isSubmitting,
+                  setFieldValue,
               }) => {
                 const commonProps = (name: keyof PvNominalPowerFormValues): TextFieldProps => ({
                     size: 'small',
@@ -88,46 +88,49 @@ export const PvNominalPowerForm: React.FC<Props> = ({initialValues, onClose, onS
 
                 return (
                     <form onSubmit={handleSubmit}>
-                        <TextField label="Nazwa" {...commonProps('id')} disabled={Boolean(initialValues)}/>
 
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={6}>
-                                <TextField
-                                    label="Lat"
-                                    {...commonProps('lat')}
+                                <Typography mb={2}>Lokalizacja</Typography>
+                                <MapInput
+                                    value={values.location}
+                                    onChange={(position) => {
+                                        setFieldValue('location', position);
+                                    }}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={6}>
+                                <Typography>Dane</Typography>
+
+                                <TextField label="Nazwa" {...commonProps('id')} disabled={Boolean(initialValues)}/>
+
                                 <TextField
-                                    label="Lng"
-                                    {...commonProps('lng')}
+                                    label="Moc znamionowa"
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">Wp</InputAdornment>
+                                    }}
+                                    {...commonProps('power')}
+                                />
+
+                                <TextField
+                                    label="Kąt nachylenia"
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">°</InputAdornment>
+                                    }}
+                                    {...commonProps('angle')}
+                                />
+
+                                <TextField
+                                    label="Azymut"
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">°</InputAdornment>
+                                    }}
+                                    {...commonProps('azimuth')}
                                 />
                             </Grid>
                         </Grid>
 
-                        <TextField
-                            label="Moc znamionowa"
-                            InputProps={{
-                                endAdornment: <InputAdornment position="end">Wp</InputAdornment>
-                            }}
-                            {...commonProps('power')}
-                        />
 
-                        <TextField
-                            label="Kąt nachylenia"
-                            InputProps={{
-                                endAdornment: <InputAdornment position="end">°</InputAdornment>
-                            }}
-                            {...commonProps('angle')}
-                        />
-
-                        <TextField
-                            label="Azymut"
-                            InputProps={{
-                                endAdornment: <InputAdornment position="end">°</InputAdornment>
-                            }}
-                            {...commonProps('azimuth')}
-                        />
 
                         <Divider sx={{py: 2, mb: 2}}/>
                         <Box display="flex" justifyContent="flex-end">

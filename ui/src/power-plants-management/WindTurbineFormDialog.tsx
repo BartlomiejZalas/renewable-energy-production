@@ -22,6 +22,8 @@ import { useContext } from 'react';
 import { StateContext } from '../state/StateProvider';
 import { object, string, array, number } from 'yup';
 import { WindTurbine } from '../state/types';
+import { MapInput } from '../common/MapInput';
+import { DEFAULT_LOCATION } from '../common/DefaultLocation';
 
 interface Props {
     open: boolean;
@@ -32,8 +34,7 @@ interface Props {
 
 interface Values {
     id: string;
-    lat: number;
-    lng: number;
+    location: { lat: number, lng: number };
     height: number;
     roughnessFactor: number;
     characteristic: number[];
@@ -41,8 +42,6 @@ interface Values {
 
 const validationSchema = (existingIds: string[]) => object({
     id: string().required().notOneOf(existingIds),
-    lat: number().required().min(0),
-    lng: number().required().min(0),
     height: number().required().min(0),
     roughnessFactor: number().min(0).max(1).required(),
     characteristic: array().of(number().min(0).required()),
@@ -58,8 +57,7 @@ export const WindTurbineFormDialog: React.FC<Props> = ({onSave, open, onClose, i
                 validateOnChange={false}
                 initialValues={initialValues || {
                     id: '',
-                    lat: 0,
-                    lng: 0,
+                    location: DEFAULT_LOCATION,
                     height: 50,
                     roughnessFactor: 0.5,
                     characteristic: Array.from(new Array(36)).map((v) => 0),
@@ -68,8 +66,7 @@ export const WindTurbineFormDialog: React.FC<Props> = ({onSave, open, onClose, i
                 onSubmit={(values, {setSubmitting}) => {
                     const {
                         id,
-                        lat,
-                        lng,
+                        location,
                         characteristic,
                         height,
                         roughnessFactor,
@@ -81,7 +78,7 @@ export const WindTurbineFormDialog: React.FC<Props> = ({onSave, open, onClose, i
                         }),
                         {}
                     );
-                    onSave({id, location: {lat, lng}, height, roughnessFactor, characteristic: characteristicData});
+                    onSave({id, location, height, roughnessFactor, characteristic: characteristicData});
                     setSubmitting(false);
                     onClose();
                 }}
@@ -94,6 +91,7 @@ export const WindTurbineFormDialog: React.FC<Props> = ({onSave, open, onClose, i
                       handleBlur,
                       handleSubmit,
                       isSubmitting,
+                      setFieldValue,
                   }) => {
                     const commonProps = (
                         name: keyof Values
@@ -111,35 +109,37 @@ export const WindTurbineFormDialog: React.FC<Props> = ({onSave, open, onClose, i
 
                     return (
                         <form onSubmit={handleSubmit}>
-                            <TextField label="Nazwa" {...commonProps('id')} disabled={Boolean(initialValues)}/>
-
                             <Grid container spacing={2}>
                                 <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        label="Lat"
-                                        {...commonProps('lat')}
+                                    <Typography mb={2}>Lokalizacja</Typography>
+                                    <MapInput
+                                        height={200}
+                                        value={values.location}
+                                        onChange={(position) => {
+                                            setFieldValue('location', position);
+                                        }}
                                     />
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
+                                    <Typography>Dane</Typography>
+
+                                    <TextField label="Nazwa" {...commonProps('id')} disabled={Boolean(initialValues)}/>
+
                                     <TextField
-                                        label="Lng"
-                                        {...commonProps('lng')}
+                                        label="Wysokość"
+                                        {...commonProps('height')}
+                                        InputProps={{
+                                            endAdornment: <InputAdornment position="end">%</InputAdornment>
+                                        }}
+                                    />
+
+                                    <TextField
+                                        label="Współczynnik szorstkości (α)"
+                                        {...commonProps('roughnessFactor')}
                                     />
                                 </Grid>
                             </Grid>
 
-                            <TextField
-                                label="Wysokość"
-                                {...commonProps('height')}
-                                InputProps={{
-                                    endAdornment: <InputAdornment position="end">%</InputAdornment>
-                                }}
-                            />
-
-                            <TextField
-                                label="Współczynnik szorstkości (α)"
-                                {...commonProps('roughnessFactor')}
-                            />
 
                             <Typography mt={2}>Charakterystyka</Typography>
                             <Typography variant="caption" color="gray">

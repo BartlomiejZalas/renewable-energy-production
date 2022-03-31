@@ -1,0 +1,1 @@
+export const DEFAULT_LOCATION = {lat: 51.0, lng: 17.0}
