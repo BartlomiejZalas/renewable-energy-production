@@ -3,7 +3,7 @@ import {
     Button,
     Divider,
     FormHelperText,
-    Grid,
+    Grid, InputAdornment,
     TextField,
     TextFieldProps,
     Typography,
@@ -53,7 +53,7 @@ export const WindTurbineFormDialog: React.FC<Props> = ({onSave, open, onClose, i
     const {plantIds} = useContext(StateContext);
     const existingIds = initialValues ? plantIds.filter(id => id !== initialValues.id) : plantIds;
     return (
-        <Dialog open={open} onClose={onClose} title="Dodaj turbinę wiatrową">
+        <Dialog open={open} onClose={onClose} title="Turbina wiatrowa">
             <Formik<Values>
                 validateOnChange={false}
                 initialValues={initialValues || {
@@ -62,7 +62,7 @@ export const WindTurbineFormDialog: React.FC<Props> = ({onSave, open, onClose, i
                     lng: 0,
                     height: 50,
                     roughnessFactor: 0.5,
-                    characteristic: Array.from(new Array(31)).map((v) => 0),
+                    characteristic: Array.from(new Array(36)).map((v) => 0),
                 }}
                 validationSchema={validationSchema(existingIds)}
                 onSubmit={(values, {setSubmitting}) => {
@@ -131,10 +131,13 @@ export const WindTurbineFormDialog: React.FC<Props> = ({onSave, open, onClose, i
                             <TextField
                                 label="Wysokość"
                                 {...commonProps('height')}
+                                InputProps={{
+                                    endAdornment: <InputAdornment position="end">%</InputAdornment>
+                                }}
                             />
 
                             <TextField
-                                label="Współczynnik szorstkości"
+                                label="Współczynnik szorstkości (α)"
                                 {...commonProps('roughnessFactor')}
                             />
 
@@ -148,7 +151,7 @@ export const WindTurbineFormDialog: React.FC<Props> = ({onSave, open, onClose, i
                                     render={() =>
                                         values.characteristic.map(
                                             (_, index) => (
-                                                <Grid item xs={3} sm={2} md={1} key={index}>
+                                                <Grid item xs={4} sm={3} md={2} key={index}>
                                                     <TextField
                                                         fullWidth
                                                         size="small"
@@ -162,6 +165,10 @@ export const WindTurbineFormDialog: React.FC<Props> = ({onSave, open, onClose, i
                                                                 index
                                                                 ]
                                                         }
+                                                        InputProps={{
+                                                            endAdornment: <InputAdornment
+                                                                position="end">W</InputAdornment>
+                                                        }}
                                                     />
                                                 </Grid>
                                             )

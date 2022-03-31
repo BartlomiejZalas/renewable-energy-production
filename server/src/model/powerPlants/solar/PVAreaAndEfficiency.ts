@@ -11,7 +11,7 @@ export class PVAreaAndEfficiency implements PV {
     ) {}
 
     power(irradiation: number) {
-        return irradiation * this.area * this.efficiency;
+        return irradiation * this.area * (this.efficiency / 100);
     }
 
     getLocation() {

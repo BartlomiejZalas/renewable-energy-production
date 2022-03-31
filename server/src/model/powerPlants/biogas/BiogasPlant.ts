@@ -14,36 +14,32 @@ export class BiogasPlant {
         const producedElectricity =
             this.getNetElectricityFactor() *
             this.getTotalElectricistyProduction();
-        const proucedHeat =
+        const producedHeat =
             this.getNetHeatFactor() * this.getTotalHeatProduction();
 
-        return { producedElectricity, producedHeat: proucedHeat };
+        return { producedElectricity, producedHeat };
     }
 
     private getTotalElectricistyProduction() {
         return (
             this.methanePerHour *
             this.methaneCaloricValue *
-            this.electricityGeneratorEfficiency
+            (this.electricityGeneratorEfficiency / 100)
         );
     }
     private getTotalHeatProduction() {
         return (
             this.methanePerHour *
             this.methaneCaloricValue *
-            this.heatGeneratorEfficiency
+            (this.heatGeneratorEfficiency / 100)
         );
     }
 
     private getNetElectricityFactor() {
-        return 1 - this.ownElectricityConsumption;
+        return 1 - (this.ownElectricityConsumption / 100);
     }
 
     private getNetHeatFactor() {
-        return 1 - this.ownHeatConsumption;
-    }
-
-    static isBiogasPlant(plant: any): plant is BiogasPlant {
-        return plant instanceof BiogasPlant;
+        return 1 - (this.ownHeatConsumption / 100);
     }
 }

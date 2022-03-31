@@ -3,7 +3,7 @@ import {
     Accordion as MuiAccordion,
     AccordionDetails as MuiAccordionDetails,
     AccordionSummary as MuiAccordionSummary,
-    Box,
+    Box, Divider,
     Drawer,
     IconButton,
     List,
@@ -67,29 +67,31 @@ const AccordionSummary = styled((props: PropsWithChildren<any>) => (
 
 const WindTurbineTooltip = (p: WindTurbine) => (
     <Box>
-        <Typography>{p.id}</Typography>
-        <Typography>Wysokość: {p.height}m</Typography>
-        <Typography>Współczynnik szorstkości: {p.roughnessFactor}</Typography>
-        <Typography>Lokalizacja lat: {p.location.lat} </Typography>
-        <Typography>Lokalizacja lng: {p.location.lng}</Typography>
+        <Typography variant="h6">{p.id}</Typography>
+        <Divider />
+        <Typography variant="body2">Wysokość: {p.height}m</Typography>
+        <Typography variant="body2">Współczynnik szorstkości: {p.roughnessFactor}</Typography>
+        <Typography variant="body2">Lokalizacja lat: {p.location.lat} </Typography>
+        <Typography variant="body2">Lokalizacja lng: {p.location.lng}</Typography>
     </Box>
 );
 
 const PvTooltip = (p: PvNominalPower | PvEfficiency) => (
     <Box>
-        <Typography>{p.id}</Typography>
-        <Typography>Kąt nachylenia: {p.angle}°</Typography>
-        <Typography>Azymut: {p.azimuth}°</Typography>
-        <Typography>Lokalizacja lat: {p.location.lat} </Typography>
-        <Typography>Lokalizacja lng: {p.location.lng}</Typography>
+        <Typography variant="h6">{p.id}</Typography>
+        <Divider />
+        <Typography variant="body2">Kąt nachylenia: {p.angle}°</Typography>
+        <Typography variant="body2">Azymut: {p.azimuth}°</Typography>
+        <Typography variant="body2">Lokalizacja lat: {p.location.lat} </Typography>
+        <Typography variant="body2">Lokalizacja lng: {p.location.lng}</Typography>
         {p.type === 'PV_POWER' && (
-            <Typography>Moc nominalna: {p.power} Wp</Typography>
+            <Typography variant="body2">Moc nominalna: {p.power} Wp</Typography>
         )}
         {p.type === 'PV_EFFICIENCY' && (
-            <Typography>Sprawność: {p.efficiency}%</Typography>
+            <Typography variant="body2">Sprawność: {p.efficiency}%</Typography>
         )}
         {p.type === 'PV_EFFICIENCY' && (
-            <Typography>
+            <Typography variant="body2">
                 Powierzchnia: {p.area} m<sup>2</sup>
             </Typography>
         )}
@@ -98,22 +100,22 @@ const PvTooltip = (p: PvNominalPower | PvEfficiency) => (
 
 const BiogasTooltip = (p: BiogasPlant) => (
     <Box>
-        <Typography>{p.id}</Typography>
-        <Typography>
-            Strumien metanu: {p.methanePerHour} m<sup>3</sup>/h
+        <Typography variant="h6">{p.id}</Typography>
+        <Divider />
+        <Typography variant="body2">
+            Produkcja metanu: {p.methanePerHour} m<sup>3</sup>/h
         </Typography>
-        <Typography>Kaloryczność metanu: {p.methaneCaloricValue}</Typography>
-        <Typography>
-            Sprawność generatora elektrycznego:{' '}
-            {p.electricityGeneratorEfficiency}%
+        <Typography variant="body2">Kaloryczność metanu: {p.methaneCaloricValue}kwh/m<sup>3</sup></Typography>
+        <Typography variant="body2">
+            Sprawność generatora elektrycznego: {p.electricityGeneratorEfficiency}%
         </Typography>
-        <Typography>
+        <Typography variant="body2">
             Sprawność generatora cieplnego: {p.heatGeneratorEfficiency}%
         </Typography>
-        <Typography>
+        <Typography variant="body2">
             Zużycie własne elektryczności: {p.ownElectricityConsumption}%
         </Typography>
-        <Typography>Zużycie własne ciepła: {p.ownHeatConsumption}%</Typography>
+        <Typography variant="body2">Zużycie własne ciepła: {p.ownHeatConsumption}%</Typography>
     </Box>
 );
 
@@ -172,7 +174,7 @@ export const LeftDrawer = () => {
                 subtitleGen={(p) =>
                     `Moc nominalna: ${Math.max(
                         ...Object.values(p.characteristic)
-                    )}`
+                    )}W`
                 }
                 tooltipGen={WindTurbineTooltip}
                 onEdit={(p) => openPowerPlantEdition(Modal.WIND, p)}
@@ -184,9 +186,9 @@ export const LeftDrawer = () => {
                 onDelete={deletePowerPlant}
                 subtitleGen={(p) =>
                     p.type === 'PV_POWER'
-                        ? `Moc nominalna: ${p.power}`
+                        ? `Moc nominalna: ${p.power}Wp`
                         : p.type === 'PV_EFFICIENCY'
-                            ? `Sprawność: ${p.efficiency}`
+                            ? `Sprawność: ${p.efficiency}%`
                             : undefined
                 }
                 tooltipGen={PvTooltip}
@@ -204,7 +206,7 @@ export const LeftDrawer = () => {
                 title="Biogazownie"
                 plants={biogasPowerPlants}
                 onDelete={deletePowerPlant}
-                subtitleGen={(p) => `Metan: ${p.methanePerHour} m3/h`}
+                subtitleGen={(p) => `Produkcja metanu: ${p.methanePerHour} m3/h`}
                 tooltipGen={BiogasTooltip}
                 onEdit={(p) => openPowerPlantEdition(Modal.BIOGAS, p)}
             />

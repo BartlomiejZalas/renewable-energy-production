@@ -2,7 +2,7 @@ import {
     Box,
     Button,
     Divider,
-    Grid,
+    Grid, InputAdornment,
     TextField,
     TextFieldProps,
 } from '@mui/material';
@@ -107,15 +107,27 @@ export const PvNominalPowerForm: React.FC<Props> = ({initialValues, onClose, onS
 
                         <TextField
                             label="Moc znamionowa"
+                            InputProps={{
+                                endAdornment: <InputAdornment position="end">Wp</InputAdornment>
+                            }}
                             {...commonProps('power')}
                         />
 
                         <TextField
                             label="Kąt nachylenia"
+                            InputProps={{
+                                endAdornment: <InputAdornment position="end">°</InputAdornment>
+                            }}
                             {...commonProps('angle')}
                         />
 
-                        <TextField label="Azymut" {...commonProps('azimuth')} />
+                        <TextField
+                            label="Azymut"
+                            InputProps={{
+                                endAdornment: <InputAdornment position="end">°</InputAdornment>
+                            }}
+                            {...commonProps('azimuth')}
+                        />
 
                         <Divider sx={{py: 2, mb: 2}}/>
                         <Box display="flex" justifyContent="flex-end">

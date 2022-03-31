@@ -4,7 +4,7 @@ import {
     Dialog as DialogMUI,
     DialogContent,
     IconButton,
-    DialogTitle,
+    DialogTitle, Divider,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { ModalProps } from '@mui/material/Modal';
@@ -35,13 +35,14 @@ const BootstrapDialogTitle = (props: DialogTitleProps) => {
                     sx={{
                         position: 'absolute',
                         right: 8,
-                        top: 8,
+                        top: 12,
                         color: (theme) => theme.palette.grey[500],
                     }}
                 >
                     <CloseIcon/>
                 </IconButton>
             ) : null}
+            <Divider sx={{py: 1}}/>
         </DialogTitle>
     );
 };

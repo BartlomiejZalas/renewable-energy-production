@@ -1,7 +1,7 @@
 import {
     Box,
     Button,
-    Divider,
+    Divider, InputAdornment,
     TextField,
     TextFieldProps,
 } from '@mui/material';
@@ -41,7 +41,7 @@ const validationSchema = (existingIds: string[]) =>
     });
 
 export const BiogasPlantFormDialog: React.FC<Props> = ({open, onClose, onSave, initialValues}) => {
-    const {addBiogasPlant, plantIds} = useContext(StateContext);
+    const {plantIds} = useContext(StateContext);
     const existingIds = initialValues ? plantIds.filter(id => id !== initialValues.id) : plantIds;
 
     return (
@@ -92,33 +92,48 @@ export const BiogasPlantFormDialog: React.FC<Props> = ({open, onClose, onSave, i
                             <TextField label="Nazwa" {...commonProps('id')} disabled={Boolean(initialValues)}/>
 
                             <TextField
-                                label={
-                                    <span>
-                                        m<sup>3</sup> metanu / h
-                                    </span>
-                                }
+                                label="Produkcja metanu"
+                                InputProps={{
+                                    endAdornment: <InputAdornment position="end">m<sup>3</sup>&nbsp;metanu /
+                                        h</InputAdornment>
+                                }}
                                 {...commonProps('methanePerHour')}
                             />
                             <TextField
                                 label="Kaloryczność uzyskiwanego metanu"
+                                InputProps={{
+                                    endAdornment: <InputAdornment position="end">kWh/m<sup>3</sup></InputAdornment>
+                                }}
                                 {...commonProps('methaneCaloricValue')}
                             />
                             <TextField
                                 label="Sprawność generatora ciepła"
+                                InputProps={{
+                                    endAdornment: <InputAdornment position="end">%</InputAdornment>
+                                }}
                                 {...commonProps('heatGeneratorEfficiency')}
                             />
                             <TextField
                                 label="Sprawność generatora elektryczności"
+                                InputProps={{
+                                    endAdornment: <InputAdornment position="end">%</InputAdornment>
+                                }}
                                 {...commonProps(
                                     'electricityGeneratorEfficiency'
                                 )}
                             />
                             <TextField
                                 label="Zużycie własne ciepła"
+                                InputProps={{
+                                    endAdornment: <InputAdornment position="end">%</InputAdornment>
+                                }}
                                 {...commonProps('ownHeatConsumption')}
                             />
                             <TextField
-                                label="użycie własne elektryczności"
+                                InputProps={{
+                                    endAdornment: <InputAdornment position="end">%</InputAdornment>
+                                }}
+                                label="Zużycie własne elektryczności"
                                 {...commonProps('ownElectricityConsumption')}
                             />
                             <Divider sx={{py: 2, mb: 2}}/>

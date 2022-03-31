@@ -3,7 +3,7 @@ import {
     Box,
     Button,
     Divider,
-    Grid,
+    Grid, InputAdornment,
     TextField,
     TextFieldProps,
 } from '@mui/material';
@@ -94,7 +94,7 @@ export const PvEfficiencyForm: React.FC<Props> = ({onClose, onSave, initialValue
 
                 return (
                     <form onSubmit={handleSubmit}>
-                        <TextField label="Nazwa" {...commonProps('id')} disabled={Boolean(initialValues)} />
+                        <TextField label="Nazwa" {...commonProps('id')} disabled={Boolean(initialValues)}/>
 
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={6}>
@@ -113,20 +113,35 @@ export const PvEfficiencyForm: React.FC<Props> = ({onClose, onSave, initialValue
 
                         <TextField
                             label="Powierzchnia"
+                            InputProps={{
+                                endAdornment: <InputAdornment position="end">m<sup>2</sup></InputAdornment>
+                            }}
                             {...commonProps('area')}
                         />
 
                         <TextField
                             label="Sprawność"
+                            InputProps={{
+                                endAdornment: <InputAdornment position="end">%</InputAdornment>
+                            }}
                             {...commonProps('efficiency')}
                         />
 
                         <TextField
                             label="Kąt nachylenia"
+                            InputProps={{
+                                endAdornment: <InputAdornment position="end">°</InputAdornment>
+                            }}
                             {...commonProps('angle')}
                         />
 
-                        <TextField label="Azymut" {...commonProps('azimuth')} />
+                        <TextField
+                            label="Azymut"
+                            InputProps={{
+                                endAdornment: <InputAdornment position="end">°</InputAdornment>
+                            }}
+                            {...commonProps('azimuth')}
+                        />
 
                         <Divider sx={{py: 2, mb: 2}}/>
                         <Box display="flex" justifyContent="flex-end">
