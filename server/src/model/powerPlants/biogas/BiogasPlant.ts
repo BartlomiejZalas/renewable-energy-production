@@ -22,24 +22,22 @@ export class BiogasPlant {
 
     private getTotalElectricistyProduction() {
         return (
-            this.methanePerHour *
-            this.methaneCaloricValue *
-            (this.electricityGeneratorEfficiency / 100)
+            this.getMethaneValue() * (this.electricityGeneratorEfficiency / 100)
         );
     }
     private getTotalHeatProduction() {
-        return (
-            this.methanePerHour *
-            this.methaneCaloricValue *
-            (this.heatGeneratorEfficiency / 100)
-        );
+        return this.getMethaneValue() * (this.heatGeneratorEfficiency / 100);
+    }
+
+    private getMethaneValue() {
+        return ((this.methanePerHour * this.methaneCaloricValue) / 3600) * 1000;
     }
 
     private getNetElectricityFactor() {
-        return 1 - (this.ownElectricityConsumption / 100);
+        return 1 - this.ownElectricityConsumption / 100;
     }
 
     private getNetHeatFactor() {
-        return 1 - (this.ownHeatConsumption / 100);
+        return 1 - this.ownHeatConsumption / 100;
     }
 }

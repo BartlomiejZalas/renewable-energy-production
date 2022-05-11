@@ -102,7 +102,7 @@ export const BiogasPlantFormDialog: React.FC<Props> = ({open, onClose, onSave, i
                             <TextField
                                 label="Kaloryczność uzyskiwanego metanu"
                                 InputProps={{
-                                    endAdornment: <InputAdornment position="end">kWh/m<sup>3</sup></InputAdornment>
+                                    endAdornment: <InputAdornment position="end">MJ/m<sup>3</sup></InputAdornment>
                                 }}
                                 {...commonProps('methaneCaloricValue')}
                             />
